@@ -29,8 +29,8 @@ tier = CognitiveTier.MEMORY
 Building your own EAG-compatible system or extending Engrammic.
 
 For using Engrammic directly, see:
-- [engrammic-mcp](https://github.com/engrammic/mcp-client) - hosted service
-- [engrammic-engine](https://github.com/engrammic/engine) - local engine
+- [engrammic-mcp](https://github.com/engrammic-ai/mcp) - hosted service
+- [engrammic-engine](https://github.com/engrammic-ai/engine) - local engine
 
 ## Learn More
 
