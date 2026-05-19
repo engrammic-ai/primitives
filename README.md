@@ -34,7 +34,7 @@ For using Engrammic directly, see:
 
 ## Learn More
 
-- [EAG Manifesto](docs/manifesto.md) - the paradigm explained
+- [EAG Paradigm](docs/README.md) - the four-layer cognitive architecture
 
 ## Modules
 
