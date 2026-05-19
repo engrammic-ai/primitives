@@ -1,7 +1,6 @@
 """DDL (index + constraint) Cypher statements for the EAG graph schema.
 
-Extracted from context-service engine, clustering, db, and custodian query
-modules. These are applied at startup and are idempotent in Memgraph.
+Applied at startup; idempotent in Memgraph.
 """
 
 # --- HyperEdge / Silo / EDGE indexes (engine layer) ---
@@ -40,9 +39,7 @@ CLUSTER_INDEX_QUERIES: tuple[str, ...] = (
 
 ENTITY_SILO_INDEX = "CREATE INDEX ON :Entity(silo_id);"
 
-ENTITY_INDEX_QUERIES: tuple[str, ...] = (
-    ENTITY_SILO_INDEX,
-)
+ENTITY_INDEX_QUERIES: tuple[str, ...] = (ENTITY_SILO_INDEX,)
 
 # --- Custodian schema: constraints + indexes ---
 

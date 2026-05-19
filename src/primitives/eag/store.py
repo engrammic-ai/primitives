@@ -60,9 +60,7 @@ class EAGKnowledgeStore:
         ...
 
     @abstractmethod
-    async def get_batch(
-        self, node_ids: list[str], scope: Scope
-    ) -> list[KnowledgeNode]:
+    async def get_batch(self, node_ids: list[str], scope: Scope) -> list[KnowledgeNode]:
         """Retrieve multiple nodes by ID in a single round-trip.
 
         Absent node IDs are silently omitted from the result list rather than

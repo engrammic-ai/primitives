@@ -1,7 +1,6 @@
 """Cluster Cypher query constants.
 
-Extracted from context-service/src/context_service/clustering/queries.py.
-All queries use $param placeholders — no string concatenation with user input.
+All queries use $param placeholders - no string concatenation with user input.
 """
 
 # --- Cluster CRUD ---

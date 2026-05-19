@@ -10,7 +10,9 @@ from dataclasses import dataclass
 class MissingEvidenceError(Exception):
     """Raised when Knowledge layer write lacks required evidence."""
 
-    message: str = "Knowledge layer requires evidence. Use 'remember' for observations without evidence."
+    message: str = (
+        "Knowledge layer requires evidence. Use 'remember' for observations without evidence."
+    )
 
     def __str__(self) -> str:
         return self.message

@@ -255,7 +255,7 @@ The Custodian handles transitions; agents express intent through MCP tools.
 
 ## Evidence Pipeline (Service Layer)
 
-The context-service implements evidence validation:
+The service layer implements evidence validation:
 
 ```
 URI -> Cache -> Allowlist -> Reachability -> [Fetch] -> [Ingest] -> Result

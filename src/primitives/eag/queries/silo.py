@@ -1,7 +1,6 @@
 """Silo Cypher query constants.
 
-Extracted from context-service/src/context_service/engine/queries.py.
-All queries use $param placeholders — no string concatenation with user input.
+All queries use $param placeholders - no string concatenation with user input.
 """
 
 CREATE_SILO = """

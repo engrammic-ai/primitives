@@ -1,7 +1,6 @@
 """EAG Agent Protocol definitions.
 
-Defines abstract interfaces for EAG agents and tools. Implementations
-live in private repositories (context-service); this module provides
+Defines abstract interfaces for EAG agents and tools. This module provides
 the protocol contract that implementations must follow.
 """
 

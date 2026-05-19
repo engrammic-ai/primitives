@@ -37,37 +37,47 @@ class CITEEdgeType(StrEnum):
 
 
 # Edge sets by function
-PROVENANCE_EDGES: frozenset[str] = frozenset({
-    CITEEdgeType.DERIVED_FROM,
-    CITEEdgeType.EXTRACTED_FROM,
-    CITEEdgeType.SUPERSEDES,
-    CITEEdgeType.SYNTHESIZED_FROM,
-    CITEEdgeType.PROMOTED_FROM,
-    CITEEdgeType.CRYSTALLIZED_INTO,
-    CITEEdgeType.DECLARED_BY,
-})
+PROVENANCE_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.DERIVED_FROM,
+        CITEEdgeType.EXTRACTED_FROM,
+        CITEEdgeType.SUPERSEDES,
+        CITEEdgeType.SYNTHESIZED_FROM,
+        CITEEdgeType.PROMOTED_FROM,
+        CITEEdgeType.CRYSTALLIZED_INTO,
+        CITEEdgeType.DECLARED_BY,
+    }
+)
 
-SEMANTIC_EDGES: frozenset[str] = frozenset({
-    CITEEdgeType.MENTIONS,
-    CITEEdgeType.USES_PREDICATE,
-    CITEEdgeType.CAUSES,
-    CITEEdgeType.CORROBORATES,
-    CITEEdgeType.PREVENTS,
-    CITEEdgeType.REFERENCES,
-})
+SEMANTIC_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.MENTIONS,
+        CITEEdgeType.USES_PREDICATE,
+        CITEEdgeType.CAUSES,
+        CITEEdgeType.CORROBORATES,
+        CITEEdgeType.PREVENTS,
+        CITEEdgeType.REFERENCES,
+    }
+)
 
-CLUSTERING_EDGES: frozenset[str] = frozenset({
-    CITEEdgeType.MEMBER_OF,
-    CITEEdgeType.COVERS,
-})
+CLUSTERING_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.MEMBER_OF,
+        CITEEdgeType.COVERS,
+    }
+)
 
-PATTERN_EDGES: frozenset[str] = frozenset({
-    CITEEdgeType.OBSERVED_IN,
-})
+PATTERN_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.OBSERVED_IN,
+    }
+)
 
-META_MEMORY_EDGES: frozenset[str] = frozenset({
-    CITEEdgeType.ABOUT,
-})
+META_MEMORY_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.ABOUT,
+    }
+)
 
 ALL_CITE_EDGES: frozenset[str] = (
     PROVENANCE_EDGES | SEMANTIC_EDGES | CLUSTERING_EDGES | PATTERN_EDGES | META_MEMORY_EDGES
