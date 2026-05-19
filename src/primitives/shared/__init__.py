@@ -1,6 +1,6 @@
 """Shared primitives: paradigm-agnostic utilities.
 
-These modules are used across all paradigm implementations (CAG, RAG, etc.).
+These modules are used across the EAG paradigm implementation.
 Signals (heat, freshness, priority) stay in the product repo — they're
 proprietary implementation details.
 """

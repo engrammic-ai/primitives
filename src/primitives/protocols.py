@@ -17,11 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    pass
-
+from typing import Any, Protocol, runtime_checkable
 
 # ---------------------------------------------------------------------------
 # Common types

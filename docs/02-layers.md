@@ -43,7 +43,7 @@
 
 Revision writes a new `:Belief` with a `SUPERSEDES` edge to the old Belief, `reason='evidence_shift'`. Old Beliefs remain queryable for audit and `as_of` temporal queries — Beliefs are never replaced in place.
 
-> **Cross-layer exception:** `:Commitment` is structurally a Knowledge-layer Claim subtype (multi-labeled `:Claim:Commitment`, SPO-structured, predicate-registry-governed) but carries Wisdom-layer semantics (authored stance via `DECLARED_BY`, reconcilable by the `commitment_reconciler`, revisable on author update). This is the single cross-layer node type in CAG; every other node belongs to exactly one layer.
+> **Cross-layer exception:** `:Commitment` is structurally a Knowledge-layer Claim subtype (multi-labeled `:Claim:Commitment`, SPO-structured, predicate-registry-governed) but carries Wisdom-layer semantics (authored stance via `DECLARED_BY`, reconcilable by the `commitment_reconciler`, revisable on author update). This is the single cross-layer node type in EAG; every other node belongs to exactly one layer.
 
 **Scoring:** `similarity × evidence_strength × underlying_fact_recency × proximity × wisdom_status_multiplier`
 - `wisdom_status ∈ {'active', 'stale'}`; stale Beliefs score at 0.1x (defined by erasure cascade)

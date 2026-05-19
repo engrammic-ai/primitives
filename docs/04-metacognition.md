@@ -186,8 +186,8 @@ Unlike Memory layer content, meta-observations don't decay. They're valuable for
 
 ## References
 
-- [Meta-Memory Roadmap](../../context-service/context/plans/meta-memory-roadmap.md)
-- [Phase 1: Provenance](../../context-service/context/plans/meta-memory/phase-1-provenance.md)
-- [Phase 2: Time-Travel](../../context-service/context/plans/meta-memory/phase-2-time-travel.md)
-- [Phase 3: Belief History](../../context-service/context/plans/meta-memory/phase-3-belief-history.md)
-- [Phase 4: Reflection](../../context-service/context/plans/meta-memory/phase-4-reflection.md)
+- [Meta-Memory Roadmap](../../context-service/context/plans/archive/meta-memory-roadmap.md)
+- [Phase 1: Provenance](../../context-service/context/plans/archive/meta-memory/phase-1-provenance.md)
+- [Phase 2: Time-Travel](../../context-service/context/plans/archive/meta-memory/phase-2-time-travel.md)
+- [Phase 3: Belief History](../../context-service/context/plans/archive/meta-memory/phase-3-belief-history.md)
+- [Phase 4: Reflection](../../context-service/context/plans/archive/meta-memory/phase-4-reflection.md)

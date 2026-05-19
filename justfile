@@ -48,7 +48,7 @@ test:
 
 # Run tests with coverage report
 coverage:
-    uv run pytest --cov=primitives --cov-report=html --cov-report=term-missing
+    uv run pytest --cov=src/primitives --cov-report=html --cov-report=term-missing
 
 # --- Build ---
 

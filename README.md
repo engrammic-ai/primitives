@@ -11,17 +11,18 @@ pip install engrammic-primitives
 ## Usage
 
 ```python
-from primitives.schema import MemoryNode, KnowledgeNode, WisdomNode
-from primitives.eag import CognitiveTier
+from primitives.schema import PersistenceLayer, MemoryLabel, KnowledgeLabel
+from primitives.eag import combined_confidence, should_promote_r1
 
-# Create a memory node
-node = MemoryNode(
-    content="User prefers dark mode",
-    importance=0.7,
-)
+# Check persistence layer for a label
+layer = PersistenceLayer.MEMORY
+assert MemoryLabel.UTTERANCE.layer == layer
 
-# Check cognitive tier
-tier = CognitiveTier.MEMORY
+# Combine confidence scores
+conf = combined_confidence(base=0.7, corroboration=0.85)
+
+# Check if a claim should promote to Fact
+decision = should_promote_r1(confidence=0.8, corroboration_count=3)
 ```
 
 ## When to Use

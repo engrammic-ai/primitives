@@ -48,7 +48,7 @@ The layers themselves are a taxonomy. The **transitions** between them define th
 
 ## Why transitions, not layers, are the architecture
 
-If you know the four layers but not the transitions, you can't build CAG. The layers tell you *what exists*; the transitions tell you *what moves*. A CAG implementation is largely the sum of its transition workers.
+If you know the four layers but not the transitions, you can't build EAG. The layers tell you *what exists*; the transitions tell you *what moves*. An EAG implementation is largely the sum of its transition workers.
 
 Consequence: the Custodian (service-layer proprietary) is internally structured as one worker per transition, plus a shared epistemology library. Transitions are first-class design objects.
 

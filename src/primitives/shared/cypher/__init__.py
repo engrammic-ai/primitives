@@ -1,6 +1,6 @@
 """Cypher query helpers: base utilities for query construction.
 
-Paradigm-specific queries live in cag/queries/, rag/queries/, etc.
+Paradigm-specific queries live in eag/queries/.
 This module provides shared helpers.
 """
 
