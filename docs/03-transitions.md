@@ -20,6 +20,10 @@ The layers themselves are a taxonomy. The **transitions** between them define th
     Intelligence -- trace -------> Memory
     Intelligence -- commit ------> Wisdom (Commitment)
     Intelligence -- crystallize -> Wisdom (from WorkingHypothesis)
+
+    Any ----------- forget ------> tombstone (soft-delete, cancel window)
+    tombstone ---- cancel_forget -> restored (within window only)
+    tombstone ---- hard_delete --> gone (scheduled GC, no recovery)
 ```
 
 ## Transition catalogue
@@ -39,10 +43,12 @@ The layers themselves are a taxonomy. The **transitions** between them define th
 | T11 | **Wisdom -> Wisdom** (accept) | validator accepts ProposedBelief | eager | N/A |
 | T12 | **Wisdom -> ⊥** (reject) | validator rejects ProposedBelief | eager | N/A |
 | T13 | **Intelligence -> Wisdom** (crystallize) | agent crystallizes WorkingHypothesis | eager | N/A |
+| T14 | **Any -> tombstone** (forget) | agent calls `forget` tool | eager | N/A |
+| T15 | **tombstone -> restored** (cancel_forget) | agent calls `cancel_forget` within cancel window | eager | N/A |
 
 ## The execution rule
 
-- **Eager** for correctness-critical transitions (T2 supersession, T7 commit)
+- **Eager** for correctness-critical transitions (T2 supersession, T7 commit, T14 forget, T15 cancel_forget)
 - **Signal-driven + heat-ranked** for optimisation transitions (T1 extract, T3 synthesize, T4 revise)
 - **Batched / lazy / scheduled** for housekeeping (T5 consensus, T6 trace, T8/T9 decay)
 
@@ -68,3 +74,5 @@ Every transition that creates a node writes a provenance edge back to its source
 - T11 accept: `(:Belief)-[:PROMOTED_FROM]->(:ProposedBelief)` with `accepted_at` timestamp
 - T12 reject: `(:ProposedBelief)` marked `status='rejected'` with `reason` and `rejected_at`
 - T13 crystallize: `(:Commitment)-[:CRYSTALLIZED_FROM]->(:WorkingHypothesis)`
+- T14 forget: node gains `tombstoned_at` + `forget_requested_at` timestamps; `forget_reason` if provided
+- T15 cancel_forget: `tombstoned_at` + `forget_requested_at` cleared (only if within cancel window)

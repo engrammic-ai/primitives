@@ -37,11 +37,12 @@ What is NOT in this library (proprietary to the service layer):
 |-----|----------|
 | [01-paradigm.md](01-paradigm.md) | Why EAG, the category error in RAG, when EAG pays off |
 | [02-layers.md](02-layers.md) | KMWI layer semantics, node types, scoring formulas |
-| [03-transitions.md](03-transitions.md) | Transition catalogue (T1-T9), execution rules, provenance |
+| [03-transitions.md](03-transitions.md) | Transition catalogue (T1-T15), execution rules, provenance |
 | [04-metacognition.md](04-metacognition.md) | Meta-memory, provenance, time-travel, reflection |
 | [05-mcp-contract.md](05-mcp-contract.md) | MCP tool contract and invariants |
 | [06-epistemology.md](06-epistemology.md) | Deterministic primitives: confidence, contradiction, corroboration |
 | [07-agent-usage.md](07-agent-usage.md) | Agent cognitive guide for EAG usage |
+| [08-data-lifecycle.md](08-data-lifecycle.md) | Forget, decay, hard-delete, GDPR erasure |
 
 ## Reading order
 
