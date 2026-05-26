@@ -4,6 +4,8 @@ The schema library for Engrammic, a structured memory system for AI agents.
 
 Most AI agents treat context like a scratchpad. Engrammic treats it like cognition: observations become claims, claims become facts, facts become beliefs. This library defines the types and rules that make that work.
 
+> **Library for integrators.** If you just want to use Engrammic memory in your agent, see [engrammic-mcp](https://github.com/engrammic-ai/mcp) (hosted) or [engrammic-engine](https://github.com/engrammic-ai/engine) (local).
+
 ## Install
 
 ```bash
