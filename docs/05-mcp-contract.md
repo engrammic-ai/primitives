@@ -145,7 +145,7 @@ reflect(
 
 #### hypothesize
 
-Form a tentative belief.
+Form a tentative belief. **Session-scoped:** hypotheses only exist within the MCP session that created them. Must call `commit` within the same session to persist as permanent wisdom. For cross-session conclusions, use `believe` directly.
 
 ```
 hypothesize(
@@ -158,7 +158,7 @@ hypothesize(
 
 #### revise
 
-Update a tentative belief.
+Update a tentative belief. Only works within the session that created the hypothesis.
 
 ```
 revise(
@@ -171,7 +171,7 @@ revise(
 
 #### commit
 
-Crystallize to permanent commitment.
+Crystallize hypotheses to permanent commitments. **Must be called in the same session as `hypothesize`.** Hypotheses that are not committed before the session ends are garbage collected.
 
 ```
 commit(
