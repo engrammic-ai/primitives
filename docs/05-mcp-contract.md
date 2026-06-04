@@ -8,8 +8,8 @@ The MCP surface uses **intent-based tools** that map to what agents want to do, 
 
 | Profile | Tools | Use case |
 |---------|-------|----------|
-| **standard** | 7 | Most agents. Observe, claim, believe, search, trace, connect. |
-| **reasoning** | 12 | Extended reasoning with tentative belief management. |
+| **standard** | 10 | Most agents. Observe, claim, believe, search, trace, connect, plus utility tools. |
+| **reasoning** | 15 | Adds tentative belief management (hypothesize, revise, commit). |
 
 This follows the "fewer well-designed tools" principle: agents learn tools named for their intent, with profiles providing the right subset for the context.
 
@@ -179,6 +179,46 @@ commit(
   reason: str | None,
 ) -> {committed: [...], superseded: [...]}
 ```
+
+### Utility Tools (both profiles)
+
+#### forget
+
+Request deletion of a node.
+
+```
+forget(
+  node_id: str,              # Node to delete
+  reason: str | None,        # Why deleting
+) -> {status, cancel_window_ends}
+```
+
+The node enters a cancel window before permanent deletion.
+
+#### dismiss
+
+Dismiss a contradiction or stale-commitment marker.
+
+```
+dismiss(
+  marker_id: str,            # Marker to dismiss
+  reason: str | None,        # Why dismissing (false positive, acknowledged, etc.)
+) -> {dismissed_at}
+```
+
+Use for false positives or acknowledged issues that don't require resolution.
+
+#### tick
+
+Lightweight engagement check.
+
+```
+tick(
+  about_hint: list[str] | None,  # Optional: scope to specific nodes
+) -> {pending_markers: [...], stale_commitments: [...]}
+```
+
+Returns pending markers without a full recall. Safe to call frequently; zero side effects.
 
 ## Internal Tools (Not Agent-Facing)
 
