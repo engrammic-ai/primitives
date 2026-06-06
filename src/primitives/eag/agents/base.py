@@ -10,7 +10,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
@@ -58,7 +58,6 @@ class AgentConfig:
     retries: int = 8
 
 
-T = TypeVar("T")
 DepsT = TypeVar("DepsT", bound="DepsProtocol")
 OutputT = TypeVar("OutputT")
 
@@ -86,7 +85,7 @@ class DepsProtocol(Protocol):
 
 
 @dataclass
-class AgentResult(Generic[T]):
+class AgentResult[T]:
     """Result from an agent run."""
 
     output: T
