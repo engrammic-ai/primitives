@@ -25,6 +25,10 @@ class CITEEdgeType(StrEnum):
     PREVENTS = "PREVENTS"
     REFERENCES = "REFERENCES"
 
+    # Epistemology edges (confidence propagation)
+    SUPPORTS = "SUPPORTS"
+    CONTRADICTS = "CONTRADICTS"
+
     # Clustering edges
     MEMBER_OF = "MEMBER_OF"
     COVERS = "COVERS"
@@ -79,6 +83,18 @@ META_MEMORY_EDGES: frozenset[str] = frozenset(
     }
 )
 
+EPISTEMOLOGY_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.SUPPORTS,
+        CITEEdgeType.CONTRADICTS,
+    }
+)
+
 ALL_CITE_EDGES: frozenset[str] = (
-    PROVENANCE_EDGES | SEMANTIC_EDGES | CLUSTERING_EDGES | PATTERN_EDGES | META_MEMORY_EDGES
+    PROVENANCE_EDGES
+    | SEMANTIC_EDGES
+    | CLUSTERING_EDGES
+    | PATTERN_EDGES
+    | META_MEMORY_EDGES
+    | EPISTEMOLOGY_EDGES
 )
