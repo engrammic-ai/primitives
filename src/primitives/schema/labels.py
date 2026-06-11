@@ -28,6 +28,7 @@ class MemoryLabel(StrEnum):
     PASSAGE = "Passage"
     UTTERANCE = "Utterance"
     EVENT = "Event"
+    OBSERVATION = "Observation"
 
 
 class KnowledgeLabel(StrEnum):
