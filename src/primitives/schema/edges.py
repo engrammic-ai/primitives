@@ -39,6 +39,10 @@ class CITEEdgeType(StrEnum):
     # Meta-memory edges
     ABOUT = "ABOUT"
 
+    # Reasoning chain edges
+    TRACED_FROM = "TRACED_FROM"
+    CONSENSUS_FROM = "CONSENSUS_FROM"
+
 
 # Edge sets by function
 PROVENANCE_EDGES: frozenset[str] = frozenset(
@@ -83,6 +87,13 @@ META_MEMORY_EDGES: frozenset[str] = frozenset(
     }
 )
 
+REASONING_CHAIN_EDGES: frozenset[str] = frozenset(
+    {
+        CITEEdgeType.TRACED_FROM,
+        CITEEdgeType.CONSENSUS_FROM,
+    }
+)
+
 EPISTEMOLOGY_EDGES: frozenset[str] = frozenset(
     {
         CITEEdgeType.SUPPORTS,
@@ -97,4 +108,5 @@ ALL_CITE_EDGES: frozenset[str] = (
     | PATTERN_EDGES
     | META_MEMORY_EDGES
     | EPISTEMOLOGY_EDGES
+    | REASONING_CHAIN_EDGES
 )
