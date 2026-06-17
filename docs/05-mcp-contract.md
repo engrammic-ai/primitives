@@ -8,7 +8,7 @@ The MCP surface uses **intent-based tools** that map to what agents want to do, 
 
 | Profile | Tools | Use case |
 |---------|-------|----------|
-| **standard** | 10 | Most agents. Observe, claim, believe, search, trace, connect, plus utility tools. |
+| **standard** | 10 | Most agents. Observe, claim, decide, search, trace, connect, plus utility tools. |
 | **reasoning** | 15 | Adds tentative belief management (hypothesize, revise, commit). |
 
 This follows the "fewer well-designed tools" principle: agents learn tools named for their intent, with profiles providing the right subset for the context.
@@ -51,17 +51,48 @@ learn(
 ) -> {node_id, evidence_status, created_at}
 ```
 
-#### believe
+#### decide
 
-Declare a commitment.
+Declare a commitment or decision.
 
 ```
-believe(
-  belief: str,               # What you believe
+decide(
+  conclusion: str,           # What you decided
   about: list[str],          # REQUIRED: node IDs this concerns
   confidence: float = 0.8,
-  reasoning: str | None,     # Why you believe this
+  supersedes: str | None,    # Previous node to supersede
 ) -> {node_id, created_at}
+```
+
+#### accept
+
+Accept a ProposedBelief from SAGE synthesis. The system synthesizes beliefs from corroborated facts; agents must explicitly accept or dismiss them.
+
+```
+accept(
+  node_id: str,              # ProposedBelief to accept
+) -> {node_id, status: "accepted"}
+```
+
+#### dismiss
+
+Dismiss an engagement marker or reject a ProposedBelief.
+
+```
+dismiss(
+  node_id: str,              # Marker or ProposedBelief to dismiss
+  reason: str | None,        # Why dismissing
+) -> {status: "dismissed"}
+```
+
+#### history
+
+View how a node evolved over time via supersession chain.
+
+```
+history(
+  node_id: str,              # Node to get history for
+) -> {chain: [{node_id, content, created_at, superseded_by}, ...]}
 ```
 
 #### recall
@@ -145,7 +176,7 @@ reflect(
 
 #### hypothesize
 
-Form a tentative belief. **Session-scoped:** hypotheses only exist within the MCP session that created them. Must call `commit` within the same session to persist as permanent wisdom. For cross-session conclusions, use `believe` directly.
+Form a tentative belief. **Session-scoped:** hypotheses only exist within the MCP session that created them. Must call `commit` within the same session to persist as permanent wisdom. For cross-session conclusions, use `decide` directly.
 
 ```
 hypothesize(
@@ -253,7 +284,7 @@ profile = (
 |------|-------------------|---------------------|
 | remember | No | Memories ARE grounding |
 | learn | Yes | `DERIVED_FROM` edge to Memory node or validated URI |
-| believe | No | Derives from Knowledge via synthesis |
+| decide | No | Derives from Knowledge via synthesis |
 | reason | No | Session-scoped, ephemeral |
 | reflect | No | References existing nodes via `about` |
 
@@ -286,7 +317,7 @@ Race conditions are resolved through:
 |------|---------------|---------------------|
 | `remember` | Memory | T8 (decay), T9 (hard-delete) |
 | `learn` | Knowledge | T1 (extract from), T2 (supersede), T5 (promote to) |
-| `believe` | Wisdom | T7 (commit) |
+| `decide` | Wisdom | T7 (commit) |
 | `reflect` | Meta | (none — meta-observations don't transition) |
 | `reason` | Intelligence | T5 (consensus), T6 (trace) |
 | `trace` | (read) | T6 (trace) |

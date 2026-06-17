@@ -68,11 +68,11 @@ Every transition that creates a node writes a provenance edge back to its source
 - T2 supersede: `(:Fact_new)-[:SUPERSEDES]->(:Fact_old)` with reason + timestamp
 - T3 synthesize: `(:Belief)-[:SYNTHESIZED_FROM]->(:Fact)+` (>= N required)
 - T5 consensus: `(:Fact)-[:PROMOTED_FROM]->(:ReasoningChain)+`
-- T6 trace: `(:ReasoningChain)-[:DERIVED_FROM_EVIDENCE]->(:Document|:Passage|:Claim)+`; optionally `(:ReasoningChain)-[:CRYSTALLIZED_INTO]->(:Claim)` for crystallizations
+- T6 trace: `(:ReasoningChain)-[:TRACED_FROM]->(:Document|:Passage|:Claim)+`; optionally `(:ReasoningChain)-[:CRYSTALLIZED_INTO]->(:Claim)` for crystallizations
 - T7 commit: `(:Claim:Commitment)-[:DECLARED_BY]->(:Agent)` (per D1); `CRYSTALLIZED_INTO` used for Intelligence->Knowledge linkage
 - T10 propose: `(:ProposedBelief)-[:SYNTHESIZED_FROM]->(:Fact)+` (same as T3, but creates proposal)
 - T11 accept: `(:Belief)-[:PROMOTED_FROM]->(:ProposedBelief)` with `accepted_at` timestamp
 - T12 reject: `(:ProposedBelief)` marked `status='rejected'` with `reason` and `rejected_at`
-- T13 crystallize: `(:Commitment)-[:CRYSTALLIZED_FROM]->(:WorkingHypothesis)`
+- T13 crystallize: `(:Commitment)-[:CRYSTALLIZED_INTO]->(:WorkingHypothesis)` (inverse direction from hypothesis)
 - T14 forget: node gains `tombstoned_at` + `forget_requested_at` timestamps; `forget_reason` if provided
 - T15 cancel_forget: `tombstoned_at` + `forget_requested_at` cleared (only if within cancel window)

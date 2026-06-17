@@ -6,7 +6,7 @@ Extraction produces **structured claims** in the form `(subject, predicate, obje
 
 **Consequence:** promotion, supersession, and synthesis decisions are replayable, auditable, fast, cheap.
 
-This is the core of what `primitives` exposes: all four primitives below are implemented as pure functions in `primitives.epistemology`.
+This is the core of what `primitives` exposes: all four primitives below are implemented as pure functions in `primitives.eag`.
 
 ## The four primitives
 
