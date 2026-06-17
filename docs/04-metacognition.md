@@ -150,11 +150,11 @@ Observation types:
 
 | Tool | Purpose |
 |------|---------|
-| `context_provenance(node_id)` | Trace citation chain to source |
-| `context_lookup(query, as_of)` | Query historical state |
-| `context_belief_history(subject)` | Show belief evolution |
-| `context_reflect(observation, about)` | Store meta-observation |
-| `context_get_reflections(node_id)` | Retrieve meta-observations |
+| `trace(node_id)` | Trace citation chain to source |
+| `recall(query, since, until)` | Query with temporal filters |
+| `history(node_id)` | Show belief evolution via supersession chain |
+| `reflect(observation, about)` | Store meta-observation |
+| `recall(node_id, include_reflections)` | Retrieve meta-observations |
 
 ## Design Principles
 
@@ -164,7 +164,7 @@ Meta-Memory doesn't change how the four layers work. It adds observability witho
 
 ### 2. Explicit over implicit
 
-Reflection is explicit: agent calls `context_reflect()`. The system doesn't auto-generate meta-observations (though it could in the future).
+Reflection is explicit: agent calls `reflect()`. The system doesn't auto-generate meta-observations (though it could in the future).
 
 ### 3. Silo-scoped
 

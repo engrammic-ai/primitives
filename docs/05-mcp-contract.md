@@ -6,12 +6,9 @@
 
 The MCP surface uses **intent-based tools** that map to what agents want to do, not implementation layers. Two profiles serve different use cases:
 
-| Profile | Tools | Use case |
-|---------|-------|----------|
-| **standard** | 10 | Most agents. Observe, claim, decide, search, trace, connect, plus utility tools. |
-| **reasoning** | 15 | Adds tentative belief management (hypothesize, revise, commit). |
+The surface exposes 17 tools covering the full cognitive stack: observation, claims, decisions, search, provenance, and reasoning.
 
-This follows the "fewer well-designed tools" principle: agents learn tools named for their intent, with profiles providing the right subset for the context.
+This follows the "fewer well-designed tools" principle: agents learn tools named for their intent.
 
 ## Silo Tenancy
 
@@ -21,7 +18,7 @@ The service derives `silo_id` deterministically from `org_id` in the auth contex
 
 ## Tool Surface
 
-### Standard Profile (7 tools)
+### Core Tools
 
 #### remember
 
@@ -251,30 +248,9 @@ tick(
 
 Returns pending markers without a full recall. Safe to call frequently; zero side effects.
 
-## Internal Tools (Not Agent-Facing)
-
-These are NOT exposed to agents. Used by SAGE and internal systems:
-
-| Tool | Internal Use |
-|------|--------------|
-| `context_admin` | Silo management, session lifecycle |
-| `context_accept_belief` | Custodian accepting ProposedBeliefs |
-| `context_reject_belief` | Custodian rejecting ProposedBeliefs |
-| `context_belief_state` | Internal session inspection |
-
 ## Configuration
 
-Tools are configured via YAML at `src/context_service/config/mcp_tools.yaml`. Profile selection:
-
-```python
-# Priority: param > env > settings > default
-profile = (
-    param
-    or os.environ.get("MCP_TOOL_PROFILE")
-    or settings.mcp_tool_profile
-    or "standard"
-)
-```
+Tools are configured via YAML at `src/context_service/config/mcp_tools.yaml`.
 
 ## Evidence Requirements
 
