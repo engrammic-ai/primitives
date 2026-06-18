@@ -52,6 +52,10 @@ class IntelligenceLabel(StrEnum):
 
     EPISTEMIC_STATE = "EpistemicState"  # Confidence/confusion snapshot
     BREAKTHROUGH = "Breakthrough"  # What resolved a stuck state
+    # Backwards compat (v1): remove after hypothesize/commit migration
+    REASONING_CHAIN = "ReasoningChain"
+    WORKING_HYPOTHESIS = "WorkingHypothesis"
+    REASONING_SESSION = "ReasoningSession"
 
 
 class RegistryLabel(StrEnum):
