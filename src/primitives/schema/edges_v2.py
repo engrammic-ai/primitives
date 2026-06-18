@@ -24,6 +24,10 @@ class CITEEdgeType(StrEnum):
     # Meta-structure
     ABOUT = "ABOUT"  # Commitment -> target nodes
 
+    # Backwards compat (v1): remove after callers migrate
+    CORROBORATES = "CORROBORATES"  # -> SUPPORTS
+    EXTRACTED_FROM = "EXTRACTED_FROM"  # -> DERIVED_FROM
+
 
 # Edge sets by function
 PROVENANCE_EDGES: frozenset[str] = frozenset({
