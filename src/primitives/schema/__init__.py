@@ -11,26 +11,33 @@ Default exports are v2. For v1 compatibility, import explicitly:
 """
 
 # v2 schema (current default)
+# v1 schema (legacy, for migration)
+from primitives.schema import edges as edges_v1
+from primitives.schema import labels as labels_v1
 from primitives.schema.edges_v2 import (
+    AGENT_CREATABLE_EDGES,
     ALL_CITE_EDGES,
+    DEPRECATED_EDGES,
+    EDGE_MIGRATION,
+    EDGE_WEIGHTS,
     EPISTEMOLOGY_EDGES,
     META_EDGES,
     PROVENANCE_EDGES,
-    CITEEdgeType,
-    EDGE_WEIGHTS,
-    AGENT_CREATABLE_EDGES,
     SYSTEM_CREATED_EDGES,
-    DEPRECATED_EDGES,
-    EDGE_MIGRATION,
+    CITEEdgeType,
 )
 from primitives.schema.labels_v2 import (
+    AGENT_WRITABLE_LABELS,
     ALL_CITE_LABELS,
     AUDIT_LABELS,
     CONTENT_LABELS,
+    DEPRECATED_LABELS,
     INTELLIGENCE_LABELS,
     KNOWLEDGE_LABELS,
+    LABEL_MIGRATION,
     MEMORY_LABELS,
     REGISTRY_LABELS,
+    SYSTEM_CREATED_LABELS,
     WISDOM_LABELS,
     AuditLabel,
     IntelligenceLabel,
@@ -40,15 +47,7 @@ from primitives.schema.labels_v2 import (
     RegistryLabel,
     WisdomLabel,
     layer_for_label,
-    AGENT_WRITABLE_LABELS,
-    SYSTEM_CREATED_LABELS,
-    DEPRECATED_LABELS,
-    LABEL_MIGRATION,
 )
-
-# v1 schema (legacy, for migration)
-from primitives.schema import edges as edges_v1
-from primitives.schema import labels as labels_v1
 
 __all__ = [
     # Edges (v2)
