@@ -4,7 +4,7 @@ The schema library for Engrammic, a structured memory system for AI agents.
 
 Most AI agents treat context like a scratchpad. Engrammic treats it like cognition: observations become claims, claims become facts, facts become beliefs. This library defines the types and rules that make that work.
 
-> **Library for integrators.** If you just want to use Engrammic memory in your agent, see [engrammic-mcp](https://github.com/engrammic-ai/mcp) (hosted) or [engrammic-engine](https://github.com/engrammic-ai/engine) (local).
+> **Library for integrators.** If you just want to use Engrammic memory in your agent, see [engrammic-mcp](https://github.com/engrammic-ai/mcp) for the hosted service or [engrammic](https://github.com/engrammic-ai/engrammic) to self-host.
 
 ## Install
 
@@ -41,8 +41,8 @@ decision = should_promote_r1(confidence=0.8, corroboration_count=3)
 You're building something that stores and retrieves structured agent context, and you want compatibility with the Engrammic ecosystem.
 
 If you just want to use Engrammic:
-- [engrammic-mcp](https://github.com/engrammic-ai/mcp) for hosted or self-hosted service
-- [engrammic-engine](https://github.com/engrammic-ai/engine) for local-only (SQLite)
+- [engrammic-mcp](https://github.com/engrammic-ai/mcp) for the hosted service
+- [engrammic](https://github.com/engrammic-ai/engrammic) to self-host
 
 ## Modules
 
