@@ -76,6 +76,8 @@ def validate_node_for_promotion(
     has_citations: bool,
     confidence: float,
     min_confidence: float = 0.0,
+    derivation_edge_count: int | None = None,
+    min_derivation_edges: int = 0,
 ) -> ValidationResult:
     """Validate that a node meets basic promotion requirements.
 
@@ -84,6 +86,8 @@ def validate_node_for_promotion(
         has_citations: Whether node has at least one citation
         confidence: Node's confidence score
         min_confidence: Minimum confidence threshold
+        derivation_edge_count: Number of SYNTHESIZED_FROM edges (for Beliefs)
+        min_derivation_edges: Minimum required derivation edges (default 0)
 
     Returns:
         ValidationResult with any issues
@@ -101,6 +105,12 @@ def validate_node_for_promotion(
 
     if confidence < 0.5:
         warnings.append(f"Node {node_id} has low confidence {confidence:.2f}")
+
+    if derivation_edge_count is not None and derivation_edge_count < min_derivation_edges:
+        errors.append(
+            f"Node {node_id} has {derivation_edge_count} derivation edges, "
+            f"requires {min_derivation_edges} (EAG Table 2)"
+        )
 
     return ValidationResult(
         valid=len(errors) == 0,
