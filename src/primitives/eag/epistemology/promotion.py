@@ -16,8 +16,6 @@ class PromotionRule(StrEnum):
 
     R1 = "R1"  # Single authoritative source
     R2 = "R2"  # Multi-source corroboration
-    R3 = "R3"  # Reserved for future
-    R4 = "R4"  # Reserved for future
 
 
 @dataclass
