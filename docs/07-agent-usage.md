@@ -95,10 +95,10 @@ Default to `standard` unless you have reason not to.
 ## Key Relationship Types
 
 ### Provenance
-- `DERIVED_FROM` - this came from that source
-- `EXTRACTED_FROM` - extracted from document
+- `DERIVED_FROM` - this came from that source (also used for extraction)
 - `SUPERSEDES` - this replaces that (newer understanding)
 - `PROMOTED_FROM` - claim promoted to fact
+- `SYNTHESIZED_FROM` - belief synthesized from facts
 
 ### Semantic
 - `SUPPORTS` - evidence supports claim
@@ -124,7 +124,7 @@ The history of belief is as valuable as current belief.
 
 1. **Storing to Knowledge without evidence** - always provide sources
 2. **Storing to Wisdom without linking to facts** - always use `about` param
-3. **Expecting Intelligence layer across sessions** - it's ephemeral
+3. **Expecting session state to persist** - use `decide` for commitments, `learn` for facts
 4. **Deleting instead of superseding** - old beliefs chain, not delete
 5. **Not using Meta for belief changes** - lose audit trail
 

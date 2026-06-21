@@ -62,11 +62,10 @@ Used in promotion rules and supersession priority.
 Enforced at commit time by the Custodian (service layer) — not at read time. The epistemology library exposes these as validation functions.
 
 - **I1:** every `:Fact` has >= 1 `DERIVED_FROM` to a Memory-layer source
-- **I2:** every `:Belief` has >= N `SYNTHESIZED_FROM` to `:Fact` (N is the synthesis threshold)
-- **I3:** every `:Fact` with `PROMOTED_FROM` has >= K incoming edges from distinct agents (consensus rule)
+- **I2:** every `:Belief` has >= N `SYNTHESIZED_FROM` to `:Fact` (N = 3, the synthesis threshold)
+- **I3:** every `:Commitment` has >= 1 `ABOUT` edge + 1 `DECLARED_BY` edge
 - **I4:** no cycles in provenance edges — layer ordering enforces it (edges always point backwards in layer order: Knowledge -> Memory; Wisdom -> Knowledge; never forwards)
 - **I5:** `SUPERSEDES` edges require non-null `reason ∈ {'contradiction', 'evidence_shift', 'author_update', 'evidence_erased'}`
-- **I6:** every `:ReasoningChain` has >= 1 `DERIVED_FROM_EVIDENCE` edge when `source='session_trace_inferred'` or >= 1 `CRYSTALLIZED_INTO` edge when `source='agent_explicit'`
 
 Violations are rejected at write time, not ignored.
 
@@ -80,9 +79,8 @@ What lives in extraction (not Custodian):
 
 What lives in Custodian (not extraction):
 - Contradiction detection against existing Facts
-- Promotion decision (apply R1/R2/R3 rules)
+- Promotion decision (apply R1/R2 rules)
 - Synthesis triggers
 - Revision decisions
-- Consensus detection
 
 The `primitives.epistemology` functions are the shared math that both sides can call. Extraction calls `combined_confidence` and `detect_contradiction` (structural only). The Custodian calls promotion rules + full contradiction detection.

@@ -16,41 +16,42 @@ The layers themselves are a taxonomy. The **transitions** between them define th
    (retrieval                     (ProposedBelief ->
     weight -> 0)                   Belief or tombstone)
 
-    Intelligence -- consensus ---> Knowledge
-    Intelligence -- trace -------> Memory
-    Intelligence -- commit ------> Wisdom (Commitment)
-    Intelligence -- crystallize -> Wisdom (from WorkingHypothesis)
+    Agent --------- decide ------> Wisdom (Commitment, direct declaration)
 
     Any ----------- forget ------> tombstone (soft-delete, cancel window)
     tombstone ---- cancel_forget -> restored (within window only)
     tombstone ---- hard_delete --> gone (scheduled GC, no recovery)
 ```
 
+> **CITE v2 note:** Intelligence layer writes (consensus, trace, crystallize from
+> WorkingHypothesis) were removed. Agents now use `decide` for direct commitments
+> or `hypothesize`+`commit` for session-scoped tentative beliefs.
+
 ## Transition catalogue
 
 | # | Transition | Trigger predicate | Execution | Priority |
 |---|---|---|---|---|
-| T1 | **Memory -> Knowledge** (extract) | passage is hot OR source-changed OR cold-but-queried | signal-driven | `heat × (1 / last_extracted_at)` |
+| T1 | **Memory -> Knowledge** (extract) | passage is hot OR source-changed OR cold-but-queried | batch (SAGE custodian) | `heat × (1 / last_extracted_at)` |
 | T2 | **Knowledge -> Knowledge** (supersede) | new Fact's (s, p, o) conflicts with existing Fact | eager (synchronous in validator) | N/A |
-| T3 | **Knowledge -> Wisdom** (synthesize) | cluster density >= N AND no current Belief covers it | signal-driven | `heat × cluster_density` |
-| T4 | **Wisdom -> Wisdom** (revise) | distribution shift >= M% since last synthesis | signal-driven — Revision = supersede-with-new-Belief, not in-place edit. Preserves audit chain. | `heat × shift_magnitude` |
-| T5 | **Intelligence -> Knowledge** (consensus) | >= K reasoning chains from effective_J >= J agents agree | lazy | consensus timestamp |
-| T6 | **Intelligence -> Memory** (trace) | reasoning chain completes | batched post-session | session end time |
-| T7 | **Intelligence -> Wisdom** (commit) — writes `:Claim:Commitment` (Knowledge-structure, Wisdom-semantics) | agent declares a stance | eager | N/A |
-| T8 | **Memory -> ⊥** (decay) | time-based; retrieval weight -> 0 | compute-at-query | N/A |
-| T9 | **Memory -> ⊥** (hard-delete) | `age > 2 × class.σ` OR GDPR | scheduled GC (hard-delete default) | `age` |
-| T10 | **Knowledge -> Wisdom** (propose) | synthesis confidence in weak range (above min, below auto-promote) | signal-driven | `heat × confidence` |
-| T11 | **Wisdom -> Wisdom** (accept) | validator accepts ProposedBelief | eager | N/A |
-| T12 | **Wisdom -> ⊥** (reject) | validator rejects ProposedBelief | eager | N/A |
-| T13 | **Intelligence -> Wisdom** (crystallize) | agent crystallizes WorkingHypothesis | eager | N/A |
+| T3 | **Knowledge -> Wisdom** (synthesize) | cluster density >= 3 AND no current Belief covers it | batch (SAGE synthesizer) | `heat × cluster_density` |
+| T4 | **Wisdom -> Wisdom** (revise) | distribution shift >= M% since last synthesis | batch (SAGE synthesizer) | `heat × shift_magnitude` |
+| T7 | **Agent -> Wisdom** (decide) | agent declares a stance via `decide` tool | eager | N/A |
+| T8 | **Memory -> ⊥** (decay) | time-based; retrieval weight -> 0 | batch (SAGE decayer) | N/A |
+| T9 | **Memory -> ⊥** (hard-delete) | `age > 2 × class.σ` OR GDPR | scheduled GC | `age` |
+| T10 | **Knowledge -> Wisdom** (propose) | synthesis confidence in weak range | batch (SAGE synthesizer) | `heat × confidence` |
+| T11 | **Wisdom -> Wisdom** (accept) | agent accepts ProposedBelief via `accept` tool | eager | N/A |
+| T12 | **Wisdom -> ⊥** (reject) | agent rejects ProposedBelief via `dismiss` tool | eager | N/A |
 | T14 | **Any -> tombstone** (forget) | agent calls `forget` tool | eager | N/A |
 | T15 | **tombstone -> restored** (cancel_forget) | agent calls `cancel_forget` within cancel window | eager | N/A |
 
+> **Deprecated (CITE v2):** T5 (consensus), T6 (trace), T13 (crystallize) removed.
+> Intelligence layer writes were killed; agents use direct `decide` or session-scoped `hypothesize`.
+
 ## The execution rule
 
-- **Eager** for correctness-critical transitions (T2 supersession, T7 commit, T14 forget, T15 cancel_forget)
-- **Signal-driven + heat-ranked** for optimisation transitions (T1 extract, T3 synthesize, T4 revise)
-- **Batched / lazy / scheduled** for housekeeping (T5 consensus, T6 trace, T8/T9 decay)
+- **Eager** for correctness-critical transitions (T2 supersession, T7 decide, T11 accept, T14 forget, T15 cancel_forget)
+- **Batch (SAGE pipeline)** for optimization transitions (T1 extract, T3 synthesize, T4 revise, T10 propose)
+- **Scheduled GC** for housekeeping (T8 decay, T9 hard-delete)
 
 ## Why transitions, not layers, are the architecture
 
@@ -64,15 +65,12 @@ The epistemology library in this package implements the deterministic decision f
 
 Every transition that creates a node writes a provenance edge back to its source(s):
 
-- T1 extract: `(:Claim)-[:DERIVED_FROM]->(:Passage)` (Extraction owns)
+- T1 extract: `(:Claim)-[:DERIVED_FROM]->(:Document)` (extraction provenance)
 - T2 supersede: `(:Fact_new)-[:SUPERSEDES]->(:Fact_old)` with reason + timestamp
-- T3 synthesize: `(:Belief)-[:SYNTHESIZED_FROM]->(:Fact)+` (>= N required)
-- T5 consensus: `(:Fact)-[:PROMOTED_FROM]->(:ReasoningChain)+`
-- T6 trace: `(:ReasoningChain)-[:TRACED_FROM]->(:Document|:Passage|:Claim)+`; optionally `(:ReasoningChain)-[:CRYSTALLIZED_INTO]->(:Claim)` for crystallizations
-- T7 commit: `(:Claim:Commitment)-[:DECLARED_BY]->(:Agent)` (per D1); `CRYSTALLIZED_INTO` used for Intelligence->Knowledge linkage
-- T10 propose: `(:ProposedBelief)-[:SYNTHESIZED_FROM]->(:Fact)+` (same as T3, but creates proposal)
+- T3 synthesize: `(:Belief)-[:SYNTHESIZED_FROM]->(:Fact)+` (>= 3 required)
+- T7 decide: `(:Commitment)-[:DECLARED_BY]->(:Agent)` + `(:Commitment)-[:ABOUT]->(:node)+`
+- T10 propose: `(:ProposedBelief)-[:SYNTHESIZED_FROM]->(:Fact)+` (same as T3, pending status)
 - T11 accept: `(:Belief)-[:PROMOTED_FROM]->(:ProposedBelief)` with `accepted_at` timestamp
 - T12 reject: `(:ProposedBelief)` marked `status='rejected'` with `reason` and `rejected_at`
-- T13 crystallize: `(:Commitment)-[:CRYSTALLIZED_INTO]->(:WorkingHypothesis)` (inverse direction from hypothesis)
-- T14 forget: node gains `tombstoned_at` + `forget_requested_at` timestamps; `forget_reason` if provided
-- T15 cancel_forget: `tombstoned_at` + `forget_requested_at` cleared (only if within cancel window)
+- T14 forget: node gains `tombstoned_at` + `cancel_window_expires` timestamps
+- T15 cancel_forget: `tombstoned_at` cleared (only if within cancel window)

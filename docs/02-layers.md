@@ -52,17 +52,19 @@ Revision writes a new `:Belief` with a `SUPERSEDES` edge to the old Belief, `rea
 
 **Semantics:** ephemeral inference. Session-scoped. Temporary computational state.
 
+> **CITE v2 note:** Intelligence layer writes (consensus promotion, trace persistence,
+> WorkingHypothesis crystallization) were removed. The layer remains conceptually
+> for session-scoped reasoning state, but agents use `decide` for direct commitments
+> rather than Intelligence-to-Wisdom promotion paths.
+
 **Node types:**
-- `:ReasoningChain` — a stored reasoning sequence with steps inlined as a `steps: list[ChainStep]` JSON property (not separate nodes)
-- `:QueryContext` — the working set assembled for a specific query
-- `:WorkingHypothesis` — an agent's in-progress hypothesis during reasoning (session-scoped, mutable)
+- `:QueryContext` — the working set assembled for a specific query (session-scoped)
 
-**Promotion paths out:**
-- `Intelligence → Knowledge` via consensus: >= K chains from effective_J >= threshold agents agree → promote to Fact
-- `Intelligence → Memory` via trace: reasoning chain completes → compact trace stored as experience
-- `Intelligence → Wisdom` via commit: agent declares a stance from session work → Commitment
+**Agent paths to Wisdom:**
+- `decide` tool → creates `:Commitment` directly (no Intelligence promotion)
+- `hypothesize` + `commit` → session-scoped beliefs (not persisted as Intelligence nodes)
 
-**Scoring:** session-scoped only. Not retrieved cross-session (the session-end trace lives in Memory afterwards).
+**Scoring:** session-scoped only. Not retrieved cross-session.
 
 ## Why these four (and not three or five)
 
