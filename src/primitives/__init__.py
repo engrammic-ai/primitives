@@ -3,4 +3,4 @@
 Hot-swappable knowledge management primitives for AI agent context systems.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
