@@ -10,6 +10,7 @@ from primitives.eag.epistemology.confidence import (
     incremental_noisy_or,
     noisy_or_aggregate,
     partial_confidence,
+    warrant,
 )
 from primitives.eag.epistemology.promotion import (
     ClaimForPromotion,
@@ -37,6 +38,7 @@ from primitives.eag.epistemology.supersession import (
 __all__ = [
     "SourceTier",
     "combined_confidence",
+    "warrant",
     "noisy_or_aggregate",
     "incremental_noisy_or",
     "partial_confidence",

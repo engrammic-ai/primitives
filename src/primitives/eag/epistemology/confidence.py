@@ -38,7 +38,8 @@ def combined_confidence(
 ) -> float:
     """Compute combined confidence for a single claim.
 
-    Formula: source_tier * corroboration_factor * method_weight * raw_confidence
+    This implements the warrant function w(n) from EAG Definition A.4:
+    w(n) = source_tier * corroboration_factor * method_weight * raw_confidence
 
     Args:
         raw_confidence: Base confidence from extraction (0.0 - 1.0)
@@ -51,6 +52,10 @@ def combined_confidence(
     """
     result = source_tier.weight * corroboration_factor * method_weight * raw_confidence
     return min(max(result, 0.0), 1.0)
+
+
+# Alias for EAG Definition A.4 terminology
+warrant = combined_confidence
 
 
 def noisy_or_aggregate(confidences: list[float], cap: float = 0.99) -> float:
