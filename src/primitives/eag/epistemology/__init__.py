@@ -1,4 +1,4 @@
-"""Epistemology primitives: confidence, promotion, supersession.
+"""Epistemology primitives: confidence, promotion, supersession, propagation.
 
 All functions here are pure and deterministic. No LLM calls happen
 at adjudication time.
@@ -17,6 +17,14 @@ from primitives.eag.epistemology.promotion import (
     PromotionRule,
     should_promote_r1,
     should_promote_r2,
+)
+from primitives.eag.epistemology.propagation import (
+    DEPENDENCY_EDGES,
+    DependencyEdgeType,
+    DependencySet,
+    Edge,
+    compute_deps,
+    direct_dependents,
 )
 from primitives.eag.epistemology.supersession import (
     ContradictionResult,
@@ -37,6 +45,12 @@ __all__ = [
     "PromotionDecision",
     "should_promote_r1",
     "should_promote_r2",
+    "DependencyEdgeType",
+    "DEPENDENCY_EDGES",
+    "Edge",
+    "DependencySet",
+    "direct_dependents",
+    "compute_deps",
     "ContradictionResult",
     "FactForSupersession",
     "SupersessionDecision",
