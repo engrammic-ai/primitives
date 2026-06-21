@@ -76,7 +76,7 @@ def should_promote_r1(claim: ClaimForPromotion) -> PromotionDecision:
 def should_promote_r2(claims: list[ClaimForPromotion]) -> PromotionDecision:
     """Check if a group of claims qualifies for R2 promotion.
 
-    R2: >= 2 claims with same fingerprint, combined confidence >= 0.8,
+    R2: >= 3 claims with same fingerprint, combined confidence >= 0.8,
     at least one authoritative source.
 
     Args:
@@ -85,11 +85,11 @@ def should_promote_r2(claims: list[ClaimForPromotion]) -> PromotionDecision:
     Returns:
         PromotionDecision with result and reasoning
     """
-    if len(claims) < 2:
+    if len(claims) < 3:
         return PromotionDecision(
             should_promote=False,
             rule=None,
-            reason=f"R2 requires >= 2 sources, got {len(claims)}",
+            reason=f"R2 requires >= 3 sources, got {len(claims)}",
         )
 
     has_authoritative = any(c.source_tier == SourceTier.AUTHORITATIVE for c in claims)

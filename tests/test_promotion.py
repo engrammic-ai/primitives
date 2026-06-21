@@ -76,16 +76,27 @@ class TestShouldPromoteR2:
         decision = should_promote_r2(claims)
 
         assert decision.should_promote is False
-        assert ">= 2" in decision.reason
+        assert ">= 3" in decision.reason
 
     def test_empty_list_rejected(self):
         decision = should_promote_r2([])
         assert decision.should_promote is False
 
-    def test_two_claims_with_authoritative_promotes(self):
+    def test_two_claims_rejected(self):
         claims = [
             make_claim(combined_confidence=0.7, source_tier=SourceTier.AUTHORITATIVE),
             make_claim(combined_confidence=0.6, source_tier=SourceTier.VALIDATED),
+        ]
+        decision = should_promote_r2(claims)
+
+        assert decision.should_promote is False
+        assert ">= 3" in decision.reason
+
+    def test_three_claims_with_authoritative_promotes(self):
+        claims = [
+            make_claim(combined_confidence=0.7, source_tier=SourceTier.AUTHORITATIVE),
+            make_claim(combined_confidence=0.6, source_tier=SourceTier.VALIDATED),
+            make_claim(combined_confidence=0.6, source_tier=SourceTier.COMMUNITY),
         ]
         decision = should_promote_r2(claims)
 
@@ -95,6 +106,7 @@ class TestShouldPromoteR2:
     def test_no_authoritative_source_rejected(self):
         claims = [
             make_claim(combined_confidence=0.9, source_tier=SourceTier.VALIDATED),
+            make_claim(combined_confidence=0.9, source_tier=SourceTier.COMMUNITY),
             make_claim(combined_confidence=0.9, source_tier=SourceTier.COMMUNITY),
         ]
         decision = should_promote_r2(claims)
@@ -106,6 +118,7 @@ class TestShouldPromoteR2:
         claims = [
             make_claim(combined_confidence=0.3, source_tier=SourceTier.AUTHORITATIVE),
             make_claim(combined_confidence=0.3, source_tier=SourceTier.VALIDATED),
+            make_claim(combined_confidence=0.3, source_tier=SourceTier.COMMUNITY),
         ]
         decision = should_promote_r2(claims)
 
@@ -116,10 +129,11 @@ class TestShouldPromoteR2:
         claims = [
             make_claim(combined_confidence=0.7, source_tier=SourceTier.AUTHORITATIVE),
             make_claim(combined_confidence=0.7, source_tier=SourceTier.VALIDATED),
+            make_claim(combined_confidence=0.7, source_tier=SourceTier.COMMUNITY),
         ]
         decision = should_promote_r2(claims)
 
-        expected_aggregate = 1 - (0.3 * 0.3)
+        expected_aggregate = 1 - (0.3 * 0.3 * 0.3)
         assert abs(decision.aggregate_confidence - expected_aggregate) < 0.01
 
     def test_many_weak_sources_can_promote(self):

@@ -19,6 +19,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
+from primitives.schema.labels_v2 import NodeStatus
+
 # ---------------------------------------------------------------------------
 # Common types
 # ---------------------------------------------------------------------------
@@ -55,6 +57,7 @@ class KnowledgeNode:
     confidence: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    status: NodeStatus = NodeStatus.ACTIVE
 
 
 @dataclass

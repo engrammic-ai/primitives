@@ -9,6 +9,14 @@ from __future__ import annotations
 from enum import StrEnum
 
 
+class NodeStatus(StrEnum):
+    """Lifecycle status for content nodes."""
+
+    ACTIVE = "active"
+    SUPERSEDED = "superseded"
+    TOMBSTONED = "tombstoned"
+
+
 class PersistenceLayer(StrEnum):
     """The four EAG layers plus registry and audit."""
 

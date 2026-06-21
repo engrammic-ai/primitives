@@ -43,6 +43,7 @@ from primitives.schema.labels_v2 import (
     IntelligenceLabel,
     KnowledgeLabel,
     MemoryLabel,
+    NodeStatus,
     PersistenceLayer,
     RegistryLabel,
     WisdomLabel,
@@ -63,6 +64,8 @@ __all__ = [
     "EDGE_MIGRATION",
     # Layers
     "PersistenceLayer",
+    # Node status
+    "NodeStatus",
     # Labels by layer (v2)
     "MemoryLabel",
     "KnowledgeLabel",
