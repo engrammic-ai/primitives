@@ -4,12 +4,12 @@
 
 Plain RAG retrieves documents and appends them to a prompt. Systems built on top tend to apply **one persistence model** (usually some form of decay) uniformly to all information they store. This conflates:
 
-- A Slack message from yesterday ("I'm thinking we should use Dagster")
+- A raw observation from yesterday ("I'm thinking we should use Dagster")
 - A validated fact ("OAuth refresh tokens expire in 30 days")
-- A pattern synthesised from dozens of observations ("this team ships on Fridays")
+- A belief synthesised from dozens of observations ("this team ships on Fridays")
 - A reasoning chain generated for the current query
 
-These have *different persistence semantics*. A decaying Slack message is correct; a decaying validated fact is a bug. The paper (arxiv:2604.11364v1) calls this a category error.
+These have *different persistence semantics*. A decaying observation is correct; a decaying validated fact is a bug. The paper (arxiv:2604.11364v1) calls this a category error.
 
 ## The EAG move
 
@@ -17,10 +17,12 @@ Split persistence into four layers, each with its own semantics:
 
 | Layer | Semantics | Example |
 |---|---|---|
-| **Memory** | Gaussian decay — experiences fade | "User asked about auth on 2026-04-21 14:32" |
+| **Memory** | Gaussian decay — observations fade | "User asked about auth on 2026-04-21 14:32" |
 | **Knowledge** | Indefinite supersession — facts until contradicted | "OAuth refresh tokens expire in 30 days" |
 | **Wisdom** | Evidence-gated revision — beliefs update on shift | "This team ships on Fridays" |
 | **Intelligence** | Ephemeral — temporary inference | "For this query, I considered facts A, B, C" |
+
+The Memory layer consolidates what were previously separate node types (Document, Passage, Utterance, Event, Observation) into a single `Memory` node. The `memory_type` property distinguishes subtypes. Agents write to Memory and Knowledge; SAGE promotes to Wisdom.
 
 ## Four distinctions from RAG
 

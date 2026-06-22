@@ -4,9 +4,9 @@
 
 ## Design Philosophy
 
-The MCP surface uses **intent-based tools** that map to what agents want to do, not implementation layers. Two profiles serve different use cases:
+The MCP surface uses **intent-based tools** that map to what agents want to do, not implementation layers.
 
-The surface exposes 17 tools covering the full cognitive stack: observation, claims, decisions, search, provenance, and reasoning.
+The surface exposes 7 tools covering the full agent workflow: observation, claims, search, provenance, deletion, engagement, and updates.
 
 This follows the "fewer well-designed tools" principle: agents learn tools named for their intent.
 
@@ -18,25 +18,26 @@ The service derives `silo_id` deterministically from `org_id` in the auth contex
 
 ## Tool Surface
 
-### Core Tools
-
 #### remember
 
-Store an observation to memory.
+Store an observation to memory. Writes a Memory node. Returns immediately; node becomes searchable within ~500ms (async embedding). No evidence required.
 
 ```
 remember(
   content: str,              # What to remember
   tags: list[str] | None,    # Optional categorization
   decay: str = "standard",   # ephemeral|standard|durable|permanent
+  supersedes: str | None,    # Previous node to supersede
 ) -> {node_id, created_at}
 ```
 
 **Decay classes:** `ephemeral` (7d), `standard` (90d), `durable` (540d), `permanent` (5y)
 
+Consider `recall` first — if updating existing knowledge, pass `supersedes:<node_id>`.
+
 #### learn
 
-Assert a claim with evidence.
+Record a claim with evidence. Writes a Claim node. Returns immediately; node becomes searchable within ~500ms (async embedding).
 
 ```
 learn(
@@ -45,170 +46,51 @@ learn(
   source: str,               # document|user|external|agent
   confidence: float = 0.8,   # 0.0-1.0
   tags: list[str] | None,
+  supersedes: str | None,    # Previous node to supersede
+  source_tier: str | None,   # authoritative|validated|inferred
 ) -> {node_id, evidence_status, created_at}
 ```
 
-#### decide
-
-Declare a commitment or decision.
-
-```
-decide(
-  conclusion: str,           # What you decided
-  about: list[str],          # REQUIRED: node IDs this concerns
-  confidence: float = 0.8,
-  supersedes: str | None,    # Previous node to supersede
-) -> {node_id, created_at}
-```
-
-#### accept
-
-Accept a ProposedBelief from SAGE synthesis. The system synthesizes beliefs from corroborated facts; agents must explicitly accept or dismiss them.
-
-```
-accept(
-  node_id: str,              # ProposedBelief to accept
-) -> {node_id, status: "accepted"}
-```
-
-#### dismiss
-
-Dismiss an engagement marker or reject a ProposedBelief.
-
-```
-dismiss(
-  node_id: str,              # Marker or ProposedBelief to dismiss
-  reason: str | None,        # Why dismissing
-) -> {status: "dismissed"}
-```
-
-#### history
-
-View how a node evolved over time via supersession chain.
-
-```
-history(
-  node_id: str,              # Node to get history for
-) -> {chain: [{node_id, content, created_at, superseded_by}, ...]}
-```
+Recall first to check for existing claims — pass `supersedes:<node_id>` to update rather than duplicate.
 
 #### recall
 
-Search or fetch knowledge.
+Search or fetch knowledge. Call this at the start of any task and before storing anything.
 
 ```
 recall(
-  query: str | None,         # Natural language search
-  node_ids: list[str] | None,# Specific nodes to fetch
-  depth: int = 0,            # 0=flat, 1-3=graph traversal
-  layers: list[str] | None,  # memory|knowledge|wisdom|intelligence
+  query: str | None,              # Natural language search (or "*" to list all)
+  node_ids: list[str] | None,     # Specific nodes to fetch
+  depth: int = 0,                 # 0=flat, 1-3=graph traversal
+  layers: list[str] | None,       # memory|knowledge|wisdom|intelligence
   top_k: int = 10,
-  include_hypotheses: bool = False,  # Include tentative beliefs
-) -> {results|nodes, hypotheses?, ...}
+  include_withheld: bool = False, # Include low-confidence/unresolved-contradiction nodes
+  min_threshold: float | None,    # Override relevance cutoff (0.0-1.0)
+  fusion_mode: bool = False,      # Parallel semantic + graph retrieval with RRF fusion
+  since: str | None,              # Temporal filter (fusion_mode only): "7d", "1w", ISO datetime
+  until: str | None,              # Temporal filter (fusion_mode only): "30d", ISO datetime
+  include_hints: bool = False,    # Receive belief candidate suggestions
+) -> {results|nodes, withheld_count?, fusion_meta?, hints?}
 ```
+
+**Fusion mode:** Set `fusion_mode=true` to run semantic and graph retrieval in parallel, fusing results with Reciprocal Rank Fusion (RRF). Returns `fusion_meta` with `rrf_score` per node. Temporal filtering requires `fusion_mode=true`.
+
+Low-confidence and unresolved-contradiction nodes are withheld by default and reported as a count; pass `include_withheld=true` to see them.
 
 #### trace
 
-Explain provenance of a belief.
+Trace provenance or impact of a node.
 
 ```
 trace(
-  node_id: str,              # Node to trace
+  node_id: str,                   # Node to trace
+  direction: str = "up",          # up=walk to sources, down=walk to derived nodes
+  max_depth: int = 5,
+  edge_types: list[str] | None,   # DERIVED_FROM|PROMOTED_FROM|SYNTHESIZED_FROM|REFERENCES
 ) -> {chain: [...], root_sources: [...]}
 ```
 
-#### link
-
-Create a typed relationship.
-
-```
-link(
-  from_node: str,            # Source node
-  to_node: str,              # Target node
-  relationship: str,         # supports|contradicts|derives|references|causes|supersedes
-  weight: float = 1.0,       # 0.0-10.0
-  note: str | None,
-) -> {edge_id, created_at}
-```
-
-#### patterns
-
-Discover workflow templates.
-
-```
-patterns(
-  action: str,               # list|get|search
-  name: str | None,          # Pattern name (for get)
-  query: str | None,         # Search query
-  profile: str | None,       # Filter by profile
-) -> {patterns: [...]}
-```
-
-### Reasoning Profile (adds 5 tools)
-
-#### reason
-
-Record a reasoning chain.
-
-```
-reason(
-  steps: list[{step, reasoning, confidence?}],
-  conclusion: str | None,
-  evidence_used: list[str] | None,
-) -> {chain_id, session_id, created_at}
-```
-
-#### reflect
-
-Note a meta-observation.
-
-```
-reflect(
-  observation: str,          # What you noticed
-  type: str,                 # pattern|contradiction|uncertainty|drift
-  about: list[str],          # REQUIRED: nodes this concerns
-  confidence: float = 0.8,
-) -> {node_id, created_at}
-```
-
-#### hypothesize
-
-Form a tentative belief. **Session-scoped:** hypotheses only exist within the MCP session that created them. Must call `commit` within the same session to persist as permanent wisdom. For cross-session conclusions, use `decide` directly.
-
-```
-hypothesize(
-  hypothesis: str,           # Tentative belief
-  about: list[str],          # REQUIRED: nodes this concerns
-  confidence: float = 0.8,
-  session_id: str | None,    # Auto-derived from MCP connection
-) -> {belief_id, session_id, potential_conflicts, created_at}
-```
-
-#### revise
-
-Update a tentative belief. Only works within the session that created the hypothesis.
-
-```
-revise(
-  belief_id: str,            # Hypothesis to update
-  confidence: float,         # New confidence
-  content: str | None,       # New content (optional)
-  reason: str,               # REQUIRED: why revising
-) -> {updated_at}
-```
-
-#### commit
-
-Crystallize hypotheses to permanent commitments. **Must be called in the same session as `hypothesize`.** Hypotheses that are not committed before the session ends are garbage collected.
-
-```
-commit(
-  belief_ids: list[str],     # Hypotheses to commit
-  reason: str | None,
-) -> {committed: [...], superseded: [...]}
-```
-
-### Utility Tools (both profiles)
+`direction="up"` (default) walks backward to sources (why I believe this). `direction="down"` walks forward to derived nodes (what depends on this).
 
 #### forget
 
@@ -218,23 +100,11 @@ Request deletion of a node.
 forget(
   node_id: str,              # Node to delete
   reason: str | None,        # Why deleting
+  cascade: bool = False,     # Also tombstone downstream nodes that reference this one
 ) -> {status, cancel_window_ends}
 ```
 
-The node enters a cancel window before permanent deletion.
-
-#### dismiss
-
-Dismiss a contradiction or stale-commitment marker.
-
-```
-dismiss(
-  marker_id: str,            # Marker to dismiss
-  reason: str | None,        # Why dismissing (false positive, acknowledged, etc.)
-) -> {dismissed_at}
-```
-
-Use for false positives or acknowledged issues that don't require resolution.
+The node is tombstoned and enters a cancel window before permanent deletion. Use for GDPR erasure or removing incorrect data.
 
 #### tick
 
@@ -242,15 +112,30 @@ Lightweight engagement check.
 
 ```
 tick(
-  about_hint: list[str] | None,  # Optional: scope to specific nodes
+  about_hint: list[str] | None,  # Optional: scope to specific node IDs
 ) -> {pending_markers: [...], stale_commitments: [...]}
 ```
 
 Returns pending markers without a full recall. Safe to call frequently; zero side effects.
 
+#### update
+
+Update existing knowledge by superseding it with new content.
+
+```
+update(
+  content: str,              # The new claim text
+  evidence: list[str],       # URIs or node refs
+  target: str | None,        # Explicit node_id (skips search)
+  query: str | None,         # Semantic search to find the node to replace
+) -> {node_id, created_at} | {status: "ambiguous", candidates: [...]} | {status: "not_found"}
+```
+
+If `query` matches exactly one node above the similarity threshold (0.7), it is auto-superseded. If multiple matches are found, returns `{status: "ambiguous", candidates: [...]}` for the caller to resolve. Use `learn()` to create new knowledge without supersession.
+
 ## Configuration
 
-Tools are configured via YAML at `src/context_service/config/mcp_tools.yaml`.
+Tools are configured via YAML at `src/context_service/config/mcp_tools.yaml`. Names and descriptions are config, not code.
 
 ## Evidence Requirements
 
@@ -260,9 +145,7 @@ Tools are configured via YAML at `src/context_service/config/mcp_tools.yaml`.
 |------|-------------------|---------------------|
 | remember | No | Memories ARE grounding |
 | learn | Yes | `DERIVED_FROM` edge to Memory node or validated URI |
-| decide | No | Derives from Knowledge via synthesis |
-| reason | No | Session-scoped, ephemeral |
-| reflect | No | References existing nodes via `about` |
+| update | Yes | `DERIVED_FROM` edge to Memory node or validated URI |
 
 ### Evidence Formats
 
@@ -272,11 +155,22 @@ https://...     — External URI (validated via evidence pipeline)
 file://...      — Local file URI (for ingested sources)
 ```
 
+## Supersession Pattern
+
+Before storing, recall to check if you are updating existing knowledge. If found, pass `supersedes:<node_id>` to chain the update:
+
+```
+1. recall("API authentication method")
+2. Found node abc123: "The API uses OAuth2"
+3. learn("The API uses OAuth2 with PKCE", evidence=[...], supersedes="abc123")
+```
+
+This creates a version chain — the old node stays for history, the new node becomes current. Use `trace(node_id)` to walk the full provenance chain.
+
 ## Agent Attribution
 
 - **`agent_id`** — Auto-captured from auth context (defaults to `user:{user_id}`)
 - **`session_id`** — Auto-derived from auth token or provided via header
-- **`DECLARED_BY`** — Commitments and reflections link to declaring agent
 
 ## Concurrency Model
 
@@ -284,8 +178,16 @@ Race conditions are resolved through:
 
 1. **Deterministic IDs** — Content-based hashing (no timestamps in IDs)
 2. **MERGE semantics** — Idempotent writes
-3. **Agent-scoped nodes** — Commitments/reflections are per-agent, no conflict
-4. **Custodian reconciliation** — Conflicting claims coexist until T2 supersession
+3. **Custodian reconciliation** — Conflicting claims coexist until supersession
+
+## Wisdom Nodes
+
+Belief and Commitment nodes are system-synthesized or agent-declared via SAGE. Agents do not write them directly via tool arguments.
+
+| System path | Trigger |
+|-------------|---------|
+| Custodian: Claim -> Fact | Corroborated by 3+ sources |
+| Synthesizer: Facts -> Belief | Cluster density >= 3 facts |
 
 ## Relationship to Transitions
 
@@ -293,9 +195,7 @@ Race conditions are resolved through:
 |------|---------------|---------------------|
 | `remember` | Memory | T8 (decay), T9 (hard-delete) |
 | `learn` | Knowledge | T1 (extract from), T2 (supersede), T5 (promote to) |
-| `decide` | Wisdom | T7 (commit) |
-| `reflect` | Meta | (none — meta-observations don't transition) |
-| `reason` | Intelligence | T5 (consensus), T6 (trace) |
+| `update` | Knowledge | T2 (supersede) |
 | `trace` | (read) | T6 (trace) |
 
 The Custodian handles transitions; agents express intent through MCP tools.
@@ -318,12 +218,10 @@ Configurable per-silo via `EvidencePolicy`:
 
 I1. Every `:Claim` in Knowledge has at least one `DERIVED_FROM` edge to Memory or validated URI.
 
-I2. Every `:Commitment` has exactly one `DECLARED_BY` edge to the authoring agent.
+I2. Evidence node refs must resolve to existing nodes; dangling refs are rejected.
 
-I3. Evidence node refs must resolve to existing nodes; dangling refs are rejected.
+I3. `as_of` queries respect bi-temporal fields (`valid_from`, `valid_to`, `created_at`).
 
-I4. `as_of` queries respect bi-temporal fields (`valid_from`, `valid_to`, `created_at`).
+I4. Deterministic IDs ensure concurrent writes to same content converge to same node.
 
-I5. Deterministic IDs ensure concurrent writes to same content converge to same node.
-
-I6. `silo_id` is derived from auth; explicit silo params are rejected to prevent cross-tenant access.
+I5. `silo_id` is derived from auth; explicit silo params are rejected to prevent cross-tenant access.

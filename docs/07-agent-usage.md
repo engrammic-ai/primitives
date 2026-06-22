@@ -25,19 +25,9 @@ Before storing to Knowledge:
 
 ### The Wisdom Question: "What do I believe?"
 
-Form a belief when:
-1. You've seen the same pattern multiple times
-2. You've reasoned from facts to a conclusion
-3. You need to take a position
+Wisdom nodes (Belief) are system-synthesized by SAGE — agents do not write them directly. The Custodian promotes corroborated Claims to Facts; the Synthesizer clusters Facts into Beliefs. Agents contribute by writing high-quality Claims with evidence.
 
-**The belief test:** "Based on [these facts], I believe [this conclusion]." If you can't fill in [these facts], you don't have a belief - you have a hunch. Store hunches to Memory.
-
-### Commitment vs Belief
-
-- **Belief:** "Based on benchmarks, X is faster" (grounded in facts)
-- **Commitment:** "We will use X for all new work" (declared position)
-
-Both live in Wisdom. Beliefs need evidence. Commitments need declaration.
+**The belief test:** "Based on [these facts], I believe [this conclusion]." If you can't fill in [these facts], you have a hunch. Store hunches to Memory.
 
 ---
 
@@ -47,9 +37,8 @@ Both live in Wisdom. Beliefs need evidence. Commitments need declaration.
 |-------|-----------|-----------|-----------|
 | Memory | Raw observation, context | No | Decays (7d-5y) |
 | Knowledge | Verifiable claim | Required | Until superseded |
-| Wisdom | Synthesized belief/pattern | Links to facts | Indefinite |
-| Intelligence | Reasoning steps | No | Session only |
-| Meta-Memory | Understanding changed | Links to nodes | Never decays |
+| Wisdom | Synthesized belief (system only) | Links to facts | Indefinite |
+| Intelligence | Reasoning steps (system only) | No | Session only |
 
 ---
 
@@ -66,17 +55,17 @@ Default to `standard` unless you have reason not to.
 
 ---
 
-## Belief Formation Flow
+## Knowledge Flow
 
 ```
-1. OBSERVE   → Store to Memory (decays)
-2. CLAIM     → Store to Knowledge with evidence
-3. VERIFY    → System promotes Claim → Fact when corroborated (3+ sources)
-4. SYNTHESIZE → Form Belief linking multiple Facts
-5. COMMIT    → Optionally declare Commitment
-6. REVISE    → When new evidence, supersede (don't delete)
-7. REFLECT   → Record changes to Meta-Memory
+1. OBSERVE   → remember()  → Memory node (decays)
+2. CLAIM     → learn()     → Claim node (requires evidence)
+3. UPDATE    → update()    → Claim SUPERSEDES old Claim
+4. VERIFY    → [custodian] → Fact (promoted from corroborated Claims, 3+ sources)
+5. SYNTHESIZE → [synthesizer] → Belief (from 3+ Facts)
 ```
+
+Steps 4 and 5 are system-automated. Agents write steps 1-3 only.
 
 ---
 
@@ -92,41 +81,43 @@ Default to `standard` unless you have reason not to.
 
 ---
 
+## Tool Surface
+
+| Tool | What it writes | When to use |
+|------|---------------|-------------|
+| `remember` | Memory node | Raw observation, preference, context |
+| `learn` | Claim node | Verifiable claim with evidence URI |
+| `update` | Claim (supersedes old) | Correcting or refining existing knowledge |
+| `recall` | (read) | Search or fetch at task start and before storing |
+| `trace` | (read) | Walk provenance: why I believe this, what depends on this |
+| `forget` | Tombstone | GDPR erasure, incorrect data removal |
+| `tick` | (read) | Lightweight engagement check, pending markers |
+
+---
+
 ## Key Relationship Types
 
 ### Provenance
 - `DERIVED_FROM` - this came from that source (also used for extraction)
 - `SUPERSEDES` - this replaces that (newer understanding)
-- `PROMOTED_FROM` - claim promoted to fact
-- `SYNTHESIZED_FROM` - belief synthesized from facts
+- `PROMOTED_FROM` - claim promoted to fact by Custodian
+- `SYNTHESIZED_FROM` - belief synthesized from facts by Synthesizer
 
 ### Semantic
 - `SUPPORTS` - evidence supports claim
 - `CONTRADICTS` - conflicts with
 - `CORROBORATES` - same claim from different source
-- `CAUSES` / `PREVENTS` - causal relationships
-
----
-
-## When to Reflect (Meta-Memory)
-
-Record to Meta when:
-- You update a belief based on new evidence
-- You notice a contradiction
-- You correct a mistake
-- Your confidence shifts significantly
-
-The history of belief is as valuable as current belief.
+- `ABOUT` - node relates to a subject node
 
 ---
 
 ## Anti-patterns
 
-1. **Storing to Knowledge without evidence** - always provide sources
-2. **Storing to Wisdom without linking to facts** - always use `about` param
-3. **Expecting session state to persist** - use `decide` for commitments, `learn` for facts
-4. **Deleting instead of superseding** - old beliefs chain, not delete
-5. **Not using Meta for belief changes** - lose audit trail
+1. **Storing to Knowledge without evidence** — always provide source URIs
+2. **Expecting Wisdom nodes from agent tools** — Belief and Fact are system-created, not agent-written
+3. **Expecting session state to persist** — use `learn` for facts, `remember` for context
+4. **Deleting instead of superseding** — old claims chain, not delete; use `update` or `forget` only for erasure
+5. **Skipping recall before storing** — duplicates accumulate; always recall first to find supersession candidates
 
 ---
 
@@ -136,9 +127,8 @@ The history of belief is as valuable as current belief.
 Is this worth storing?
 ├── No → Skip
 └── Yes → What kind?
-    ├── Raw observation/context → Memory (pick decay class)
-    ├── Verifiable claim with source → Knowledge (include evidence)
-    ├── Pattern/belief from multiple facts → Wisdom (link to facts)
-    ├── Reasoning I'm doing now → Intelligence (session only)
-    └── My understanding changed → Meta (audit trail)
+    ├── Raw observation/context → remember (pick decay class)
+    ├── Verifiable claim with source → learn (include evidence URI)
+    ├── Updating existing knowledge → update (provide target or query)
+    └── Removing incorrect data → forget (cascade=true for downstream nodes)
 ```

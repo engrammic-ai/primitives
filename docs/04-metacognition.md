@@ -32,11 +32,11 @@ Every belief traces back to its source.
 ```
 Fact: "OAuth tokens expire in 30 days"
   ← promoted from Claim (confidence: 0.88)
-    ← extracted from Document "security-policy.md"
+    ← referenced from Memory "security-policy.md excerpt"
       ← ingested from source "internal wiki"
 ```
 
-Implementation: `REFERENCES` and `PROMOTED_FROM` edges already exist. Meta-Memory exposes them via query API.
+Implementation: Nodes are connected via edges (REFERENCES, DERIVED_FROM, etc.) that trace the evidence chain. The `trace()` tool walks these edges backward to the source.
 
 ### 2. Time-Travel
 
@@ -47,7 +47,7 @@ as_of("2026-04-01"): "OAuth tokens expire in 7 days"
 as_of("2026-04-20"): "OAuth tokens expire in 30 days"
 ```
 
-Implementation: Bi-temporal fields (`valid_from`, `valid_to`) on all nodes. Meta-Memory adds temporal filtering to queries.
+Implementation: Bi-temporal fields (`valid_from`, `valid_to`) on all content nodes. Queries can filter by valid time to reconstruct historical knowledge state.
 
 ### 3. Belief History
 
@@ -56,25 +56,26 @@ Track how understanding of a subject evolved.
 ```
 Subject: "OAuth token expiry"
 Timeline:
-  2026-03-01: "7 days" (confidence 0.85)
-  2026-04-15: superseded → "30 days" (confidence 0.92)
+  2026-03-01: Claim "7 days" (confidence 0.85) [ACTIVE]
+  2026-04-15: Claim "30 days" (confidence 0.92) [ACTIVE, SUPERSEDES previous]
 ```
 
-Implementation: `SUPERSEDES` edges form chains. Meta-Memory traverses and aggregates them.
+Implementation: `SUPERSEDES` edges form chains. Each new Claim or Fact can reference the node it replaces. Traversing these chains shows the evolution of understanding.
 
-### 4. Reflection
+### 4. Self-Reflection
 
-Agent stores observations about its own cognition.
+Agent stores observations about its own cognition as Memory nodes.
 
 ```
-MetaObservation:
-  "I noticed my belief about token expiry changed significantly
-   after reading the new security policy. The previous document
-   may have been outdated."
+Memory:
+  memory_type: "reflection"
+  content: "I noticed my belief about token expiry changed significantly
+            after reading the new security policy. The previous document
+            may have been outdated."
   ABOUT: [fact-old, fact-new, doc-policy]
 ```
 
-Implementation: New `:MetaObservation` node type with `ABOUT` edges to referenced nodes.
+Implementation: Memory nodes with `memory_type="reflection"` encode agent self-observations. ABOUT edges link to the entities the agent is reflecting on.
 
 ## Relationship to EAG Layers
 
@@ -83,29 +84,29 @@ Meta-Memory is orthogonal to the four cognitive layers:
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                     Meta-Memory                        │
-│   provenance · time-travel · belief-history · reflection│
+│  provenance · time-travel · belief-history · reflection │
 │ ┌─────────────────────────────────────────────────────┐ │
 │ │                  Intelligence                       │ │
-│ │           ephemeral reasoning chains                │ │
+│ │      epistemic state, breakthroughs (Phase 2)       │ │
 │ ├─────────────────────────────────────────────────────┤ │
 │ │                    Wisdom                           │ │
-│ │         patterns, beliefs, commitments              │ │
+│ │         beliefs, commitments (synthesized)          │ │
 │ ├─────────────────────────────────────────────────────┤ │
 │ │                   Knowledge                         │ │
-│ │         claims, facts, citations                    │ │
+│ │              claims, facts (verified)               │ │
 │ ├─────────────────────────────────────────────────────┤ │
 │ │                    Memory                           │ │
-│ │         passages, events, utterances                │ │
+│ │       observations, reflections, documents          │ │
 │ └─────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
 ```
 
-Each layer has:
-- Bi-temporal fields (for time-travel)
-- REFERENCES edges (for provenance)
-- SUPERSEDES edges (for belief history)
+Each content node across all layers has:
+- Bi-temporal fields (valid_from, valid_to, created_at, updated_at) for time-travel
+- Edge connections (REFERENCES, DERIVED_FROM) for provenance
+- SUPERSEDES edges for belief history
 
-Meta-Memory queries span all layers.
+Meta-Memory queries span all layers using these shared structures.
 
 ## Bi-Temporal Model
 
@@ -123,64 +124,97 @@ This enables queries like:
 - "What had I learned by April 1st?" (system time)
 - "When did I first learn about X?" (created_at)
 
-## MetaObservation Node
+## Reflection Memory Nodes
+
+Memory nodes with `memory_type="reflection"` encode metacognitive observations:
 
 Schema:
 ```
-(:MetaObservation {
+(:Memory {
   id: string,
   content: string,              // the observation itself
-  observation_type: enum,       // belief_change, contradiction, insight, etc.
-  confidence: float,            // how confident agent is in this observation
+  memory_type: "reflection",    // indicates this is a self-observation
+  confidence: float,            // agent's confidence in this observation
   created_at: datetime,
   agent_id: string,
   silo_id: string
-})-[:ABOUT]->(:Fact|:Claim|:Document|:*)
+})-[:ABOUT]->(:Memory|:Claim|:Fact|:Belief|:*)
 ```
 
-Observation types:
+Common reflection types encoded in content:
 - `belief_change` — agent noticed a belief was superseded
 - `confidence_shift` — agent noticed confidence changed
 - `contradiction` — agent noticed conflicting information
-- `uncertainty` — agent noticed high uncertainty
-- `correction` — agent acknowledges previous error
+- `uncertainty` — agent noticed high uncertainty about something
+- `correction` — agent acknowledges a previous error
 - `insight` — agent formed a new understanding
+- `pattern` — agent identified a recurring theme or connection
+
+ABOUT edges link to the specific entities being reflected upon, enabling queries like "what has this agent reflected on?" or "find reflections connected to this Fact."
 
 ## Interface (MCP Tools)
 
 | Tool | Purpose |
 |------|---------|
-| `trace(node_id)` | Trace citation chain to source |
-| `recall(query, since, until)` | Query with temporal filters |
-| `history(node_id)` | Show belief evolution via supersession chain |
-| `reflect(observation, about)` | Store meta-observation |
-| `recall(node_id, include_reflections)` | Retrieve meta-observations |
+| `remember(observation)` | Store reflection as Memory node (memory_type="reflection") |
+| `recall(query)` | Search knowledge across all layers |
+| `trace(node_id)` | Walk provenance chain (edges backward to source) |
+| `learn(claim, evidence)` | Record verified claim to Knowledge layer |
+| `update(node_id, claim, evidence)` | Supersede existing Knowledge node |
+
+Note: There is no `reflect()` tool. Self-reflection is accomplished via `remember()` with appropriate content marking it as metacognitive observation.
 
 ## Design Principles
 
 ### 1. Non-invasive
 
-Meta-Memory doesn't change how the four layers work. It adds observability without modifying core semantics.
+Meta-Memory doesn't change how the four layers work. It adds observability without modifying core semantics. Reflection is just another Memory node type.
 
 ### 2. Explicit over implicit
 
-Reflection is explicit: agent calls `reflect()`. The system doesn't auto-generate meta-observations (though it could in the future).
+Agents explicitly call `remember()` to store reflections. The system doesn't auto-generate reflections (though it could in the future via SAGE components).
 
 ### 3. Silo-scoped
 
-Meta-observations respect silo boundaries. An agent's reflections about silo A are not visible in silo B.
+All nodes, including reflections, respect silo boundaries. An agent's reflections in silo A are not visible in silo B.
 
 ### 4. No decay
 
-Unlike Memory layer content, meta-observations don't decay. They're valuable for long-term audit trails.
+Unlike transient Memory content, reflection nodes provide permanent audit trails and are valuable for understanding agent behavior over time.
 
-## Open Questions
+## Example: Belief Supersession with Reflection
 
-1. **Auto-reflection**: Should the system auto-generate observations on supersession, confidence changes, or contradictions?
+A complete scenario showing metacognition in action:
 
-2. **Cross-silo metacognition**: Can an agent have meta-observations that span silos?
+1. Agent learns initial claim:
+   ```
+   learn("OAuth tokens expire in 7 days", evidence="old_policy.md")
+   → Creates Claim node C1 with confidence 0.85
+   ```
 
-3. **Hierarchical reflection**: Can an agent have meta-observations about other meta-observations? (meta-meta-memory)
+2. Later, agent learns new information:
+   ```
+   learn("OAuth tokens expire in 30 days", evidence="new_policy.md", supersedes="C1")
+   → Creates Claim node C2 with confidence 0.92
+   → C2 has SUPERSEDES edge to C1
+   ```
 
-4. **Agent identity**: How does agent identity interact with reflection? Are reflections agent-specific or shared?
+3. SAGE promotes both to Facts after corroboration, C2 becomes the active Fact F2
+
+4. Agent reflects on this change:
+   ```
+   remember("I initially believed tokens expired in 7 days after reading the old policy.
+            Today I learned the expiry changed to 30 days when the security policy was updated.
+            This is a significant security implication.")
+   → Creates Memory node M with memory_type="reflection"
+   → M has ABOUT edges to [C1, C2, F2, policy-doc-nodes]
+   ```
+
+5. Later, trace the evolution:
+   ```
+   trace(F2) → walks DERIVED_FROM → C2 → SUPERSEDES → C1 → REFERENCES → old_policy.md
+   recall("token expiry") → includes M as contextual reflection on the belief
+   ```
+
+This enables complete auditability: not just what the agent believes now, but why it changed, when it changed, and the agent's own reasoning about the change.
 

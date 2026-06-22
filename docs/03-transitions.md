@@ -6,15 +6,15 @@ The layers themselves are a taxonomy. The **transitions** between them define th
 
 ```
     Memory --- extract ---> Knowledge --- synthesize ---> Wisdom
-      |                       |              |              |
-      |                       v              v              |
-      |                   supersede      propose         revise
-      |                (Knowledge->     (creates       (Wisdom->Wisdom
-      |                 Knowledge)    ProposedBelief)  on evidence shift)
-      v                                    |
-    decay                            accept/reject
-   (retrieval                     (ProposedBelief ->
-    weight -> 0)                   Belief or tombstone)
+      |                       |                            |
+      |                       v                            |
+      |                   supersede                     revise
+      |                (Claim->Claim,               (Belief->Belief
+      |                 Fact->Fact)                  on evidence shift)
+      v
+    decay
+   (retrieval
+    weight -> 0)
 
     Agent --------- decide ------> Wisdom (Commitment, direct declaration)
 
@@ -22,10 +22,6 @@ The layers themselves are a taxonomy. The **transitions** between them define th
     tombstone ---- cancel_forget -> restored (within window only)
     tombstone ---- hard_delete --> gone (scheduled GC, no recovery)
 ```
-
-> **CITE v2 note:** Intelligence layer writes (consensus, trace, crystallize from
-> WorkingHypothesis) were removed. Agents now use `decide` for direct commitments
-> or `hypothesize`+`commit` for session-scoped tentative beliefs.
 
 ## Transition catalogue
 
@@ -36,21 +32,15 @@ The layers themselves are a taxonomy. The **transitions** between them define th
 | T3 | **Knowledge -> Wisdom** (synthesize) | cluster density >= 3 AND no current Belief covers it | batch (SAGE synthesizer) | `heat × cluster_density` |
 | T4 | **Wisdom -> Wisdom** (revise) | distribution shift >= M% since last synthesis | batch (SAGE synthesizer) | `heat × shift_magnitude` |
 | T7 | **Agent -> Wisdom** (decide) | agent declares a stance via `decide` tool | eager | N/A |
-| T8 | **Memory -> ⊥** (decay) | time-based; retrieval weight -> 0 | batch (SAGE decayer) | N/A |
-| T9 | **Memory -> ⊥** (hard-delete) | `age > 2 × class.σ` OR GDPR | scheduled GC | `age` |
-| T10 | **Knowledge -> Wisdom** (propose) | synthesis confidence in weak range | batch (SAGE synthesizer) | `heat × confidence` |
-| T11 | **Wisdom -> Wisdom** (accept) | agent accepts ProposedBelief via `accept` tool | eager | N/A |
-| T12 | **Wisdom -> ⊥** (reject) | agent rejects ProposedBelief via `dismiss` tool | eager | N/A |
+| T8 | **Memory -> decay** | time-based; retrieval weight -> 0 | batch (SAGE decayer) | N/A |
+| T9 | **Memory -> gone** (hard-delete) | `age > 2 × class.σ` OR GDPR erasure | scheduled GC | `age` |
 | T14 | **Any -> tombstone** (forget) | agent calls `forget` tool | eager | N/A |
 | T15 | **tombstone -> restored** (cancel_forget) | agent calls `cancel_forget` within cancel window | eager | N/A |
 
-> **Deprecated (CITE v2):** T5 (consensus), T6 (trace), T13 (crystallize) removed.
-> Intelligence layer writes were killed; agents use direct `decide` or session-scoped `hypothesize`.
-
 ## The execution rule
 
-- **Eager** for correctness-critical transitions (T2 supersession, T7 decide, T11 accept, T14 forget, T15 cancel_forget)
-- **Batch (SAGE pipeline)** for optimization transitions (T1 extract, T3 synthesize, T4 revise, T10 propose)
+- **Eager** for correctness-critical transitions (T2 supersession, T7 decide, T14 forget, T15 cancel_forget)
+- **Batch (SAGE pipeline)** for optimization transitions (T1 extract, T3 synthesize, T4 revise)
 - **Scheduled GC** for housekeeping (T8 decay, T9 hard-delete)
 
 ## Why transitions, not layers, are the architecture
@@ -59,18 +49,15 @@ If you know the four layers but not the transitions, you can't build EAG. The la
 
 Consequence: the Custodian (service-layer proprietary) is internally structured as one worker per transition, plus a shared epistemology library. Transitions are first-class design objects.
 
-The epistemology library in this package implements the deterministic decision functions that underlie T1, T2, T3, T5, and T7. Scheduling and execution of the transitions themselves lives in the service layer.
+The epistemology library in this package implements the deterministic decision functions that underlie T1, T2, T3, and T7. Scheduling and execution of the transitions themselves lives in the service layer.
 
 ## Provenance across transitions
 
 Every transition that creates a node writes a provenance edge back to its source(s):
 
-- T1 extract: `(:Claim)-[:DERIVED_FROM]->(:Document)` (extraction provenance)
+- T1 extract: `(:Claim)-[:DERIVED_FROM]->(:Memory)` (extraction provenance)
 - T2 supersede: `(:Fact_new)-[:SUPERSEDES]->(:Fact_old)` with reason + timestamp
 - T3 synthesize: `(:Belief)-[:SYNTHESIZED_FROM]->(:Fact)+` (>= 3 required)
-- T7 decide: `(:Commitment)-[:DECLARED_BY]->(:Agent)` + `(:Commitment)-[:ABOUT]->(:node)+`
-- T10 propose: `(:ProposedBelief)-[:SYNTHESIZED_FROM]->(:Fact)+` (same as T3, pending status)
-- T11 accept: `(:Belief)-[:PROMOTED_FROM]->(:ProposedBelief)` with `accepted_at` timestamp
-- T12 reject: `(:ProposedBelief)` marked `status='rejected'` with `reason` and `rejected_at`
+- T7 decide: `(:Commitment)-[:ABOUT]->(:node)+`
 - T14 forget: node gains `tombstoned_at` + `cancel_window_expires` timestamps
 - T15 cancel_forget: `tombstoned_at` cleared (only if within cancel window)
