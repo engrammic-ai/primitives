@@ -49,6 +49,11 @@ from primitives.schema.labels_v2 import (
     WisdomLabel,
     layer_for_label,
 )
+from primitives.schema.models import (
+    Agent,
+    BeliefEvent,
+    ContradictionEdge,
+)
 
 __all__ = [
     # Edges (v2)
@@ -88,6 +93,10 @@ __all__ = [
     "LABEL_MIGRATION",
     # Utilities
     "layer_for_label",
+    # Multi-agent coherence models
+    "Agent",
+    "BeliefEvent",
+    "ContradictionEdge",
     # Legacy modules (for explicit v1 imports)
     "edges_v1",
     "labels_v1",

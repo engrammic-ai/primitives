@@ -58,6 +58,11 @@ class KnowledgeNode:
     created_at: datetime | None = None
     updated_at: datetime | None = None
     status: NodeStatus = NodeStatus.ACTIVE
+    # Identity fields for multi-agent coherence
+    agent_id: str | None = None
+    session_id: str | None = None
+    owner_id: str | None = None
+    model_id: str | None = None
 
 
 @dataclass
