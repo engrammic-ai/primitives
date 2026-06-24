@@ -1,4 +1,8 @@
-"""CITE edge types organized by function."""
+"""CITE edge types organized by function.
+
+Coherence Layer schema: 6 core edges.
+See primitives/docs/04-metacognition.md for how ABOUT edges enable metacognition.
+"""
 
 from __future__ import annotations
 
@@ -6,107 +10,107 @@ from enum import StrEnum
 
 
 class CITEEdgeType(StrEnum):
-    """All CITE schema edge types."""
+    """Core CITE schema edge types."""
 
-    # Provenance edges (transition outputs)
-    DERIVED_FROM = "DERIVED_FROM"
-    EXTRACTED_FROM = "EXTRACTED_FROM"
-    SUPERSEDES = "SUPERSEDES"
-    SYNTHESIZED_FROM = "SYNTHESIZED_FROM"
-    PROMOTED_FROM = "PROMOTED_FROM"
-    CRYSTALLIZED_INTO = "CRYSTALLIZED_INTO"
-    DECLARED_BY = "DECLARED_BY"
-
-    # Semantic structure edges
-    MENTIONS = "MENTIONS"
-    USES_PREDICATE = "USES_PREDICATE"
-    CAUSES = "CAUSES"
-    CORROBORATES = "CORROBORATES"
-    PREVENTS = "PREVENTS"
-    REFERENCES = "REFERENCES"
+    # Provenance edges
+    DERIVED_FROM = "DERIVED_FROM"  # Claim -> Memory, Fact -> Claim
+    SYNTHESIZED_FROM = "SYNTHESIZED_FROM"  # Belief -> Fact
+    SUPERSEDES = "SUPERSEDES"  # Any -> Any (version chain)
 
     # Epistemology edges (confidence propagation)
-    SUPPORTS = "SUPPORTS"
-    CONTRADICTS = "CONTRADICTS"
+    SUPPORTS = "SUPPORTS"  # Positive evidence
+    CONTRADICTS = "CONTRADICTS"  # Negative evidence / conflict
 
-    # Clustering edges
-    MEMBER_OF = "MEMBER_OF"
-    COVERS = "COVERS"
-
-    # Pattern edges
-    OBSERVED_IN = "OBSERVED_IN"
-
-    # Meta-memory edges
-    ABOUT = "ABOUT"
-
-    # Reasoning chain edges
-    TRACED_FROM = "TRACED_FROM"
-    CONSENSUS_FROM = "CONSENSUS_FROM"
+    # Meta-structure
+    ABOUT = "ABOUT"  # Commitment -> target nodes, reflection -> target nodes
 
 
 # Edge sets by function
-PROVENANCE_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.DERIVED_FROM,
-        CITEEdgeType.EXTRACTED_FROM,
-        CITEEdgeType.SUPERSEDES,
-        CITEEdgeType.SYNTHESIZED_FROM,
-        CITEEdgeType.PROMOTED_FROM,
-        CITEEdgeType.CRYSTALLIZED_INTO,
-        CITEEdgeType.DECLARED_BY,
-    }
-)
+PROVENANCE_EDGES: frozenset[str] = frozenset({
+    CITEEdgeType.DERIVED_FROM,
+    CITEEdgeType.SYNTHESIZED_FROM,
+    CITEEdgeType.SUPERSEDES,
+})
 
-SEMANTIC_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.MENTIONS,
-        CITEEdgeType.USES_PREDICATE,
-        CITEEdgeType.CAUSES,
-        CITEEdgeType.CORROBORATES,
-        CITEEdgeType.PREVENTS,
-        CITEEdgeType.REFERENCES,
-    }
-)
+EPISTEMOLOGY_EDGES: frozenset[str] = frozenset({
+    CITEEdgeType.SUPPORTS,
+    CITEEdgeType.CONTRADICTS,
+})
 
-CLUSTERING_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.MEMBER_OF,
-        CITEEdgeType.COVERS,
-    }
-)
-
-PATTERN_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.OBSERVED_IN,
-    }
-)
-
-META_MEMORY_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.ABOUT,
-    }
-)
-
-REASONING_CHAIN_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.TRACED_FROM,
-        CITEEdgeType.CONSENSUS_FROM,
-    }
-)
-
-EPISTEMOLOGY_EDGES: frozenset[str] = frozenset(
-    {
-        CITEEdgeType.SUPPORTS,
-        CITEEdgeType.CONTRADICTS,
-    }
-)
+META_EDGES: frozenset[str] = frozenset({
+    CITEEdgeType.ABOUT,
+})
 
 ALL_CITE_EDGES: frozenset[str] = (
     PROVENANCE_EDGES
-    | SEMANTIC_EDGES
-    | CLUSTERING_EDGES
-    | PATTERN_EDGES
-    | META_MEMORY_EDGES
     | EPISTEMOLOGY_EDGES
-    | REASONING_CHAIN_EDGES
+    | META_EDGES
 )
+
+# Confidence propagation weights
+EDGE_WEIGHTS: dict[str, float] = {
+    CITEEdgeType.SUPPORTS: 0.90,
+    CITEEdgeType.CONTRADICTS: -0.95,
+    CITEEdgeType.DERIVED_FROM: 0.85,
+    CITEEdgeType.SYNTHESIZED_FROM: 0.80,
+    CITEEdgeType.SUPERSEDES: 0.0,  # Replaces, doesn't propagate
+    CITEEdgeType.ABOUT: 0.0,  # Structural, not epistemic
+}
+
+# Agent-creatable edges (via MCP tools)
+AGENT_CREATABLE_EDGES: frozenset[str] = frozenset({
+    CITEEdgeType.DERIVED_FROM,  # via learn() references
+    CITEEdgeType.SUPERSEDES,  # via remember()/learn() supersedes param
+    CITEEdgeType.ABOUT,  # via decide() about param
+})
+
+# System-created edges (SAGE)
+SYSTEM_CREATED_EDGES: frozenset[str] = frozenset({
+    CITEEdgeType.SYNTHESIZED_FROM,
+    CITEEdgeType.SUPPORTS,
+    CITEEdgeType.CONTRADICTS,
+})
+
+
+# Deprecated edges - for migration tooling
+DEPRECATED_EDGES: frozenset[str] = frozenset({
+    # Provenance (consolidated)
+    "EXTRACTED_FROM",  # -> DERIVED_FROM
+    "PROMOTED_FROM",  # -> DERIVED_FROM
+    "CRYSTALLIZED_INTO",  # killed (no hypothesize flow)
+    "DECLARED_BY",  # killed (no agent wisdom writes)
+    # Semantic (killed)
+    "MENTIONS",  # killed (NER extraction)
+    "USES_PREDICATE",  # killed (NER extraction)
+    "CAUSES",  # killed (causal reasoning premature)
+    "CORROBORATES",  # -> SUPPORTS
+    "PREVENTS",  # killed (causal reasoning premature)
+    "REFERENCES",  # -> DERIVED_FROM
+    # Clustering (killed)
+    "MEMBER_OF",  # killed (batch clustering)
+    "COVERS",  # killed (batch clustering)
+    # Pattern (killed)
+    "OBSERVED_IN",  # killed (pattern detection)
+    # Reasoning chain (killed)
+    "TRACED_FROM",  # killed (reasoning chains)
+    "CONSENSUS_FROM",  # killed (reasoning chains)
+})
+
+EDGE_MIGRATION: dict[str, str | None] = {
+    "EXTRACTED_FROM": "DERIVED_FROM",
+    "PROMOTED_FROM": "DERIVED_FROM",
+    "REFERENCES": "DERIVED_FROM",
+    "CORROBORATES": "SUPPORTS",
+    # These are killed, no migration target
+    "CRYSTALLIZED_INTO": None,
+    "DECLARED_BY": None,
+    "MENTIONS": None,
+    "USES_PREDICATE": None,
+    "CAUSES": None,
+    "PREVENTS": None,
+    "MEMBER_OF": None,
+    "COVERS": None,
+    "OBSERVED_IN": None,
+    "TRACED_FROM": None,
+    "CONSENSUS_FROM": None,
+}

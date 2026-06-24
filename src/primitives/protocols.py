@@ -19,7 +19,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
-from primitives.schema.labels_v2 import NodeStatus
+from primitives.schema.labels import NodeStatus
 
 # ---------------------------------------------------------------------------
 # Common types

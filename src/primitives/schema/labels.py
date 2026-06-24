@@ -1,13 +1,23 @@
 """CITE node labels organized by persistence layer.
 
-Note: `PersistenceLayer` here extends the semantic 4-layer model (protocols.Layer)
-with registry and audit layers for system nodes. Use protocols.Layer for scope
-filtering in queries; use PersistenceLayer for storage-level classification.
+Coherence Layer schema: 5 content nodes (Memory, Claim, Fact, Belief, Commitment).
+Metacognition is not a layer - it's a capability over these nodes via provenance
+edges, memory_type="reflection", and ABOUT edges.
+
+See primitives/docs/04-metacognition.md for the metamemory model.
 """
 
 from __future__ import annotations
 
 from enum import StrEnum
+
+
+class NodeStatus(StrEnum):
+    """Lifecycle status for content nodes."""
+
+    ACTIVE = "active"
+    SUPERSEDED = "superseded"
+    TOMBSTONED = "tombstoned"
 
 
 class PersistenceLayer(StrEnum):
@@ -16,51 +26,50 @@ class PersistenceLayer(StrEnum):
     MEMORY = "memory"
     KNOWLEDGE = "knowledge"
     WISDOM = "wisdom"
-    INTELLIGENCE = "intelligence"
+    INTELLIGENCE = "intelligence"  # Phase 2: passive observation
     REGISTRY = "registry"
     AUDIT = "audit"
 
 
 class MemoryLabel(StrEnum):
-    """Memory layer: raw ingested content."""
+    """Memory layer: raw observations from agents.
 
-    DOCUMENT = "Document"
-    PASSAGE = "Passage"
-    UTTERANCE = "Utterance"
-    EVENT = "Event"
-    OBSERVATION = "Observation"
+    Consolidates: Document, Passage, Utterance, Event, Observation.
+    Use memory_type property to distinguish subtypes (including "reflection"
+    for metacognitive observations).
+    """
+
+    MEMORY = "Memory"
 
 
 class KnowledgeLabel(StrEnum):
-    """Knowledge layer: extracted and promoted facts."""
+    """Knowledge layer: claims and verified facts."""
 
-    FACT = "Fact"
-    CLAIM = "Claim"
-    COMMITMENT = "Commitment"  # Multi-label: Claim:Commitment
+    CLAIM = "Claim"  # Agent assertion with evidence
+    FACT = "Fact"  # SAGE-promoted from corroborated Claims
 
 
 class WisdomLabel(StrEnum):
-    """Wisdom layer: synthesized beliefs and patterns."""
+    """Wisdom layer: synthesized beliefs and agent decisions."""
 
-    BELIEF = "Belief"
-    PATTERN = "Pattern"
-    PROPOSED_BELIEF = "ProposedBelief"
+    BELIEF = "Belief"  # SAGE-synthesized from Facts
+    COMMITMENT = "Commitment"  # Agent decisions via decide()
 
 
 class IntelligenceLabel(StrEnum):
-    """Intelligence layer: reasoning artifacts."""
+    """Intelligence layer: passive observation artifacts (Phase 2).
 
-    REASONING_CHAIN = "ReasoningChain"
-    QUERY_CONTEXT = "QueryContext"
-    WORKING_HYPOTHESIS = "WorkingHypothesis"
+    These are system-created, not agent-written.
+    """
+
+    EPISTEMIC_STATE = "EpistemicState"  # Confidence/confusion snapshot
+    BREAKTHROUGH = "Breakthrough"  # What resolved a stuck state
 
 
 class RegistryLabel(StrEnum):
     """Registry: shared identity nodes."""
 
-    ENTITY = "Entity"
-    PREDICATE = "Predicate"
-    AGENT = "Agent"
+    AGENT = "Agent"  # Keep for multi-agent silos
 
 
 class AuditLabel(StrEnum):
@@ -68,13 +77,6 @@ class AuditLabel(StrEnum):
 
     ERASURE_EVENT = "ErasureEvent"
     CALIBRATION_EVENT = "CalibrationEvent"
-    BOOTSTRAP_STATE = "BootstrapState"
-
-
-class MetaMemoryLabel(StrEnum):
-    """Meta-memory: agent observations about their own epistemic state."""
-
-    META_OBSERVATION = "MetaObservation"
 
 
 # Label sets by layer
@@ -84,7 +86,6 @@ WISDOM_LABELS: frozenset[str] = frozenset(lbl.value for lbl in WisdomLabel)
 INTELLIGENCE_LABELS: frozenset[str] = frozenset(lbl.value for lbl in IntelligenceLabel)
 REGISTRY_LABELS: frozenset[str] = frozenset(lbl.value for lbl in RegistryLabel)
 AUDIT_LABELS: frozenset[str] = frozenset(lbl.value for lbl in AuditLabel)
-META_LABELS: frozenset[str] = frozenset(lbl.value for lbl in MetaMemoryLabel)
 
 ALL_CITE_LABELS: frozenset[str] = (
     MEMORY_LABELS
@@ -93,15 +94,29 @@ ALL_CITE_LABELS: frozenset[str] = (
     | INTELLIGENCE_LABELS
     | REGISTRY_LABELS
     | AUDIT_LABELS
-    | META_LABELS
 )
 
-# Content labels: nodes that carry retrievable content (excludes registry/audit)
+# Content labels: nodes that carry retrievable content
 CONTENT_LABELS: frozenset[str] = (
     MEMORY_LABELS | KNOWLEDGE_LABELS | WISDOM_LABELS | INTELLIGENCE_LABELS
 )
 
-# Label → layer mapping
+# Agent-writable labels (via MCP tools)
+AGENT_WRITABLE_LABELS: frozenset[str] = frozenset({
+    MemoryLabel.MEMORY.value,
+    KnowledgeLabel.CLAIM.value,
+    WisdomLabel.COMMITMENT.value,
+})
+
+# System-created labels (SAGE dreaming)
+SYSTEM_CREATED_LABELS: frozenset[str] = frozenset({
+    KnowledgeLabel.FACT.value,
+    WisdomLabel.BELIEF.value,
+    IntelligenceLabel.EPISTEMIC_STATE.value,
+    IntelligenceLabel.BREAKTHROUGH.value,
+})
+
+# Label -> layer mapping
 _LABEL_TO_LAYER: dict[str, PersistenceLayer] = {}
 for _m in MemoryLabel:
     _LABEL_TO_LAYER[_m.value] = PersistenceLayer.MEMORY
@@ -115,10 +130,46 @@ for _r in RegistryLabel:
     _LABEL_TO_LAYER[_r.value] = PersistenceLayer.REGISTRY
 for _a in AuditLabel:
     _LABEL_TO_LAYER[_a.value] = PersistenceLayer.AUDIT
-for _mm in MetaMemoryLabel:
-    _LABEL_TO_LAYER[_mm.value] = PersistenceLayer.AUDIT
 
 
 def layer_for_label(label: str) -> PersistenceLayer | None:
     """Return the persistence layer for a given label, or None if unknown."""
     return _LABEL_TO_LAYER.get(label)
+
+
+# Deprecated labels - for migration tooling
+DEPRECATED_LABELS: frozenset[str] = frozenset({
+    # Memory layer consolidation
+    "Document",  # -> Memory
+    "Passage",  # -> Memory
+    "Utterance",  # -> Memory
+    "Event",  # -> Memory
+    "Observation",  # -> Memory
+    # Knowledge layer
+    # (Claim and Fact kept)
+    # Wisdom layer
+    "Pattern",  # killed
+    "ProposedBelief",  # -> Belief with status property
+    # Intelligence layer (agent-facing tools killed)
+    "ReasoningChain",  # killed
+    "QueryContext",  # killed
+    "WorkingHypothesis",  # killed
+    "ReasoningSession",  # killed
+    # Registry
+    "Entity",  # killed (RAG scaffolding)
+    "Predicate",  # killed (RAG scaffolding)
+    # Meta (not a layer - use Memory with memory_type="reflection")
+    "MetaObservation",  # -> Memory
+    # Audit
+    "BootstrapState",  # killed
+})
+
+LABEL_MIGRATION: dict[str, str] = {
+    "Document": "Memory",
+    "Passage": "Memory",
+    "Utterance": "Memory",
+    "Event": "Memory",
+    "Observation": "Memory",
+    "MetaObservation": "Memory",
+    "ProposedBelief": "Belief",
+}

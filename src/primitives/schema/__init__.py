@@ -2,19 +2,12 @@
 
 Single source of truth for graph structure. Import from here, not string literals.
 
-Schema versions:
-- v1 (legacy): Full schema with 15+ nodes, 23 edges. Import from .labels, .edges
-- v2 (current): Simplified 5 nodes, 6 edges. Import from .labels_v2, .edges_v2
-
-Default exports are v2. For v1 compatibility, import explicitly:
-    from primitives.schema.labels import MemoryLabel as MemoryLabelV1
+Schema: 5 content nodes (Memory, Claim, Fact, Belief, Commitment), 6 edges.
+Metacognition is not a layer - it's a capability via provenance edges and
+Memory nodes with memory_type="reflection". See docs/04-metacognition.md.
 """
 
-# v2 schema (current default)
-# v1 schema (legacy, for migration)
-from primitives.schema import edges as edges_v1
-from primitives.schema import labels as labels_v1
-from primitives.schema.edges_v2 import (
+from primitives.schema.edges import (
     AGENT_CREATABLE_EDGES,
     ALL_CITE_EDGES,
     DEPRECATED_EDGES,
@@ -26,7 +19,7 @@ from primitives.schema.edges_v2 import (
     SYSTEM_CREATED_EDGES,
     CITEEdgeType,
 )
-from primitives.schema.labels_v2 import (
+from primitives.schema.labels import (
     AGENT_WRITABLE_LABELS,
     ALL_CITE_LABELS,
     AUDIT_LABELS,
@@ -56,7 +49,7 @@ from primitives.schema.models import (
 )
 
 __all__ = [
-    # Edges (v2)
+    # Edges
     "CITEEdgeType",
     "PROVENANCE_EDGES",
     "EPISTEMOLOGY_EDGES",
@@ -71,14 +64,14 @@ __all__ = [
     "PersistenceLayer",
     # Node status
     "NodeStatus",
-    # Labels by layer (v2)
+    # Labels by layer
     "MemoryLabel",
     "KnowledgeLabel",
     "WisdomLabel",
     "IntelligenceLabel",
     "RegistryLabel",
     "AuditLabel",
-    # Label sets (v2)
+    # Label sets
     "MEMORY_LABELS",
     "KNOWLEDGE_LABELS",
     "WISDOM_LABELS",
@@ -97,7 +90,4 @@ __all__ = [
     "Agent",
     "BeliefEvent",
     "ContradictionEdge",
-    # Legacy modules (for explicit v1 imports)
-    "edges_v1",
-    "labels_v1",
 ]
