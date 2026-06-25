@@ -1,21 +1,21 @@
-# EAG - Epistemic Augmented Generation
+# LeAP - Layered Epistemic Agent Protocol
 
-Reference documentation for the EAG paradigm implemented in this library.
+Reference documentation for the LeAP paradigm implemented in this library.
 
-## What is EAG
+## What is LeAP
 
-EAG (Epistemic Augmented Generation) is a four-layer cognitive architecture for AI agents. Information flows through distinct persistence regimes:
+LeAP (Layered Epistemic Agent Protocol) is a four-layer cognitive architecture for AI agents. Information flows through distinct persistence regimes:
 
 - **Memory** - experiences that fade (Gaussian decay)
 - **Knowledge** - facts that persist until contradicted (indefinite supersession)
 - **Wisdom** - beliefs that revise on evidence shift (evidence-gated revision)
 - **Intelligence** - ephemeral reasoning (session-scoped)
 
-Unlike RAG, EAG adjudicates (via a Custodian), tracks provenance, supports supersession, and shapes itself around usage (heat). Extraction produces structured claims; the epistemology library is deterministic.
+Unlike RAG, LeAP adjudicates (via a Custodian), tracks provenance, supports supersession, and shapes itself around usage (heat). Extraction produces structured claims; the epistemology library is deterministic.
 
 ## What this library provides
 
-`primitives` implements the open, deterministic parts of EAG:
+`primitives` implements the open, deterministic parts of LeAP:
 
 - **Epistemology** - confidence math, contradiction detection, promotion rules (R1/R2), corroboration. Pure functions, no LLM at decision time.
 - **Signals** - heat, freshness, priority scoring formulas.
@@ -35,13 +35,13 @@ What is NOT in this library (proprietary to the service layer):
 
 | Doc | Contents |
 |-----|----------|
-| [01-paradigm.md](01-paradigm.md) | Why EAG, the category error in RAG, when EAG pays off |
+| [01-paradigm.md](01-paradigm.md) | Why LeAP, the category error in RAG, when LeAP pays off |
 | [02-layers.md](02-layers.md) | KMWI layer semantics, node types, scoring formulas |
 | [03-transitions.md](03-transitions.md) | Transition catalogue (T1-T15), execution rules, provenance |
 | [04-metacognition.md](04-metacognition.md) | Meta-memory, provenance, time-travel, reflection |
 | [05-mcp-contract.md](05-mcp-contract.md) | MCP tool contract and invariants |
 | [06-epistemology.md](06-epistemology.md) | Deterministic primitives: confidence, contradiction, corroboration |
-| [07-agent-usage.md](07-agent-usage.md) | Agent cognitive guide for EAG usage |
+| [07-agent-usage.md](07-agent-usage.md) | Agent cognitive guide for LeAP usage |
 | [08-data-lifecycle.md](08-data-lifecycle.md) | Forget, decay, hard-delete, GDPR erasure |
 
 ## Reading order

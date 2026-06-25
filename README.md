@@ -56,7 +56,7 @@ If you just want to use Engrammic:
 
 ## Learn More
 
-- [EAG Paradigm](docs/README.md) for the full cognitive architecture spec
+- [LeAP Paradigm](docs/README.md) for the full cognitive architecture spec
 
 ## License
 
