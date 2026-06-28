@@ -21,7 +21,7 @@ class NodeStatus(StrEnum):
 
 
 class PersistenceLayer(StrEnum):
-    """The four EAG layers plus registry and audit."""
+    """The four EAG layers plus registry, audit, and ephemeral."""
 
     MEMORY = "memory"
     KNOWLEDGE = "knowledge"
@@ -29,6 +29,7 @@ class PersistenceLayer(StrEnum):
     INTELLIGENCE = "intelligence"  # Phase 2: passive observation
     REGISTRY = "registry"
     AUDIT = "audit"
+    EPHEMERAL = "ephemeral"  # Transient SAGE verification artifacts
 
 
 class MemoryLabel(StrEnum):
@@ -62,6 +63,7 @@ class IntelligenceLabel(StrEnum):
     These are system-created, not agent-written.
     """
 
+    REASONING_CHAIN = "ReasoningChain"  # Explicit reasoning trace
     EPISTEMIC_STATE = "EpistemicState"  # Confidence/confusion snapshot
     BREAKTHROUGH = "Breakthrough"  # What resolved a stuck state
 
@@ -79,6 +81,12 @@ class AuditLabel(StrEnum):
     CALIBRATION_EVENT = "CalibrationEvent"
 
 
+class EphemeralLabel(StrEnum):
+    """Ephemeral nodes: transient artifacts deleted after SAGE processing."""
+
+    SOURCE = "Source"  # Holds raw source content until Claim is promoted to Fact
+
+
 # Label sets by layer
 MEMORY_LABELS: frozenset[str] = frozenset(lbl.value for lbl in MemoryLabel)
 KNOWLEDGE_LABELS: frozenset[str] = frozenset(lbl.value for lbl in KnowledgeLabel)
@@ -86,6 +94,7 @@ WISDOM_LABELS: frozenset[str] = frozenset(lbl.value for lbl in WisdomLabel)
 INTELLIGENCE_LABELS: frozenset[str] = frozenset(lbl.value for lbl in IntelligenceLabel)
 REGISTRY_LABELS: frozenset[str] = frozenset(lbl.value for lbl in RegistryLabel)
 AUDIT_LABELS: frozenset[str] = frozenset(lbl.value for lbl in AuditLabel)
+EPHEMERAL_LABELS: frozenset[str] = frozenset(lbl.value for lbl in EphemeralLabel)
 
 ALL_CITE_LABELS: frozenset[str] = (
     MEMORY_LABELS
@@ -94,6 +103,7 @@ ALL_CITE_LABELS: frozenset[str] = (
     | INTELLIGENCE_LABELS
     | REGISTRY_LABELS
     | AUDIT_LABELS
+    | EPHEMERAL_LABELS
 )
 
 # Content labels: nodes that carry retrievable content
@@ -130,6 +140,8 @@ for _r in RegistryLabel:
     _LABEL_TO_LAYER[_r.value] = PersistenceLayer.REGISTRY
 for _a in AuditLabel:
     _LABEL_TO_LAYER[_a.value] = PersistenceLayer.AUDIT
+for _e in EphemeralLabel:
+    _LABEL_TO_LAYER[_e.value] = PersistenceLayer.EPHEMERAL
 
 
 def layer_for_label(label: str) -> PersistenceLayer | None:

@@ -13,7 +13,7 @@ class CITEEdgeType(StrEnum):
     """Core CITE schema edge types."""
 
     # Provenance edges
-    DERIVED_FROM = "DERIVED_FROM"  # Claim -> Memory, Fact -> Claim
+    DERIVED_FROM = "DERIVED_FROM"  # Claim -> Memory, Fact -> Claim, Claim -> Source
     SYNTHESIZED_FROM = "SYNTHESIZED_FROM"  # Belief -> Fact
     SUPERSEDES = "SUPERSEDES"  # Any -> Any (version chain)
 

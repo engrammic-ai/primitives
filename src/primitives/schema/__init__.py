@@ -3,6 +3,7 @@
 Single source of truth for graph structure. Import from here, not string literals.
 
 Schema: 5 content nodes (Memory, Claim, Fact, Belief, Commitment), 6 edges.
+Ephemeral nodes (Source) are transient verification artifacts, not permanent graph nodes.
 Metacognition is not a layer - it's a capability via provenance edges and
 Memory nodes with memory_type="reflection". See docs/04-metacognition.md.
 """
@@ -25,6 +26,7 @@ from primitives.schema.labels import (
     AUDIT_LABELS,
     CONTENT_LABELS,
     DEPRECATED_LABELS,
+    EPHEMERAL_LABELS,
     INTELLIGENCE_LABELS,
     KNOWLEDGE_LABELS,
     LABEL_MIGRATION,
@@ -33,6 +35,7 @@ from primitives.schema.labels import (
     SYSTEM_CREATED_LABELS,
     WISDOM_LABELS,
     AuditLabel,
+    EphemeralLabel,
     IntelligenceLabel,
     KnowledgeLabel,
     MemoryLabel,
@@ -47,6 +50,7 @@ from primitives.schema.models import (
     BeliefEvent,
     ContradictionEdge,
 )
+from primitives.schema.nodes import Source
 
 __all__ = [
     # Edges
@@ -71,6 +75,7 @@ __all__ = [
     "IntelligenceLabel",
     "RegistryLabel",
     "AuditLabel",
+    "EphemeralLabel",
     # Label sets
     "MEMORY_LABELS",
     "KNOWLEDGE_LABELS",
@@ -78,6 +83,7 @@ __all__ = [
     "INTELLIGENCE_LABELS",
     "REGISTRY_LABELS",
     "AUDIT_LABELS",
+    "EPHEMERAL_LABELS",
     "ALL_CITE_LABELS",
     "CONTENT_LABELS",
     "AGENT_WRITABLE_LABELS",
@@ -90,4 +96,6 @@ __all__ = [
     "Agent",
     "BeliefEvent",
     "ContradictionEdge",
+    # Ephemeral verification nodes
+    "Source",
 ]
