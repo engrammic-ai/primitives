@@ -1,7 +1,7 @@
 [project]
 name = "engrammic-primitives"
-version = "0.2.2"
-description = "EAG schema primitives for epistemic context management"
+version = "0.2.3"
+description = "LeAP schema primitives for epistemic context management"
 readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "Apache-2.0" }
